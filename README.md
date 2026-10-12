@@ -11,6 +11,7 @@
 <p align="center">
   <img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude_Code-plugin-C8FF4D?style=flat-square&labelColor=0B0F19">
   <img alt="Skill" src="https://img.shields.io/badge/command-%2Fjev--where-5CE1E6?style=flat-square&labelColor=0B0F19">
+  <img alt="Version 0.3.0" src="https://img.shields.io/badge/version-0.3.0-FF9F43?style=flat-square&labelColor=0B0F19">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-B79CFF?style=flat-square&labelColor=0B0F19">
 </p>
 
@@ -89,7 +90,7 @@ See a full example report: [examples/sample-report.md](examples/sample-report.md
 ## How it works
 
 <p align="center">
-  <img src="assets/how-it-works.svg" alt="How it works: 1 your app, 2 find fuzzy decisions, 3 write the typed question (Choice, Score, Noul), 4 fetch live precedents, 5 ranked report, 6 starter code, only if you say yes." width="100%">
+  <img src="assets/how-it-works.svg" alt="How it works: 1 your app, 2 Jev's Radar sweeps the code (regex rules, yes/no LLM calls, routing, gates, Footprints), 3 write the typed question (Choice, Score, Noul), 4 fetch live precedents, 5 ranked report with Power Jewels, 6 starter code and Treasure Map, only if you say yes." width="100%">
 </p>
 
 <sub>Drawn in <a href="https://excalidraw.com">Excalidraw</a>. To edit it, open <code>assets/src/how-it-works.excalidraw</code> there.</sub>
