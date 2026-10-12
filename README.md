@@ -93,8 +93,6 @@ See a full example report: [examples/sample-report.md](examples/sample-report.md
   <img src="assets/how-it-works.svg" alt="How it works: 1 your app, 2 Jev's Radar sweeps the code (regex rules, yes/no LLM calls, routing, gates, Footprints), 3 write the typed question (Choice, Score, Noul), 4 fetch live precedents, 5 ranked report with Power Jewels, 6 starter code and Treasure Map, only if you say yes." width="100%">
 </p>
 
-<sub>Drawn in <a href="https://excalidraw.com">Excalidraw</a>. To edit it, open <code>assets/src/how-it-works.excalidraw</code> there.</sub>
-
 ## Install
 
 ### From this GitHub repo
@@ -221,15 +219,7 @@ jev-where/
 ├── tests/                           unit tests for Jev's Radar
 ├── evals/                           `claude plugin eval` suite and fixture app
 ├── examples/                        full runs on the fixture app, with and without network
-└── assets/
-    ├── banner.svg                   the seek-and-find banner (can you spot Jev?)
-    ├── how-it-works.svg             the hand-drawn diagram, fonts embedded
-    ├── social-preview.png           1280×640 card for the repo's social preview
-    └── src/
-        ├── make_banner.py           regenerates banner.svg (change SEED to reshuffle the crowd)
-        ├── make_diagram.py          writes how-it-works.excalidraw
-        ├── how-it-works.excalidraw  open at excalidraw.com to edit by hand
-        └── render_diagram.html      renders the .excalidraw file to SVG with Excalidraw's exporter, loaded from a CDN
+└── assets/                          banner and diagram
 ```
 
 ## Credits
