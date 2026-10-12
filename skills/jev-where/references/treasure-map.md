@@ -17,6 +17,9 @@ step. Write it only when the user asks. It is a new file in the project root
 
 ## Shape
 
+An illustration only, for a made-up expense-report app. The values are not
+from any real run, and precedents must come from the run's own fetch.
+
 ```json
 {
   "schema": "jev-where/treasure-map@1",
@@ -26,51 +29,51 @@ step. Write it only when the user asks. It is a new file in the project root
   "precedent_lookup": {
     "status": "ok",
     "date": "2026-10-12",
-    "categories": ["Classification & Routing"],
+    "categories": ["Verification & Guardrails"],
     "note": null
   },
   "ideas": [
     {
-      "id": "route-tickets",
+      "id": "receipt-matches-category",
       "rank": 1,
-      "title": "Route tickets to the right team",
-      "where": [{"path": "helpdesk/router.py", "line": 14, "function": "route"}],
-      "today": "first-match regex picks a team",
+      "title": "Check that the receipt matches the expense category",
+      "where": [{"path": "expenses/review.py", "line": 42, "function": "check_receipt"}],
+      "today": "keyword list decides whether the receipt text fits the chosen category",
       "questions": [
         {
-          "type": "choice",
-          "text": "Which team should handle the request in this ticket?",
-          "options": {"billing": "charges, invoices, refunds", "general": "none of these"},
-          "state": ["ticket.subject", "ticket.body"]
+          "type": "noul",
+          "text": "The receipt text describes a purchase that fits the expense category the employee chose.",
+          "yes_means": "the items or merchant clearly belong to that category",
+          "state": ["receipt.text", "expense.category"]
         }
       ],
       "confidence": {
         "starting_point": true,
-        "bands": ["confidence >= 0.8: route", "0.5-0.8: route and flag", "< 0.5: current regex"],
-        "fallback": "current route() regex",
+        "bands": ["p >= 0.8: approve check", "p <= 0.2: send to finance", "between: current keyword rule"],
+        "fallback": "current keyword rule",
         "combine": null
       },
-      "jev_sees": {"level": "personal", "send_less": "send subject and body only; strip signatures and email addresses"},
-      "footprints": {"edits": 7, "recent_90d": 3, "fixes": 2, "complaints": 1},
-      "precedents": [{"name": "jev-cookbook", "url": "https://github.com/nexibeo/jev-cookbook", "category": "Classification & Routing"}],
+      "jev_sees": {"level": "personal", "send_less": "send line items and merchant only; strip card numbers and names"},
+      "footprints": {"edits": 6, "recent_90d": 2, "fixes": 3, "complaints": 1},
+      "precedents": [{"name": "<entry name from this run's fetch>", "url": "<exact URL from the entry>", "category": "<category file>"}],
       "benefit": "...",
       "main_risk": "...",
       "poor_fit_if": "...",
-      "why_this_rank": "every ticket x first-match regex x cheap misroutes",
+      "why_this_rank": "every expense report x brittle keyword list x finance rework on mistakes",
       "effort": "S",
       "value": "high",
       "risk": "low"
     }
   ],
-  "groups": [{"input": "each new ticket", "ideas": ["route-tickets"]}],
+  "groups": [{"input": "each submitted expense", "ideas": ["receipt-matches-category"]}],
   "power_jewels": [
-    {"id": "churn-risk", "title": "...", "where": [], "questions": [], "jev_sees": {}, "precedents": []}
+    {"id": "duplicate-receipt", "title": "...", "where": [], "questions": [], "jev_sees": {}, "precedents": []}
   ],
-  "not_jevs_job": [{"path": "...", "line": 0, "function": "...", "reason": "...", "change_my_mind": "..."}],
-  "off_the_map": [{"area": "node_modules", "why": "dependencies", "next": "/jev-where <path>"}],
+  "not_jevs_job": [{"path": "expenses/limits.py", "line": 9, "function": "over_limit", "reason": "exact amount comparison", "change_my_mind": "limits that depend on free-text justification"}],
+  "off_the_map": [{"area": "vendor/", "why": "dependencies", "next": "/jev-where <path>"}],
   "existing_jev_use": [],
-  "also_noticed": [{"path": "helpdesk/settings.py", "line": 3, "risk": "hardcoded secret (value not shown)"}],
-  "start_here": "route-tickets"
+  "also_noticed": [{"path": "config/payments.py", "line": 7, "risk": "hardcoded API key (value not shown)"}],
+  "start_here": "receipt-matches-category"
 }
 ```
 

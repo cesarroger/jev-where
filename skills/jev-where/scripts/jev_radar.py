@@ -308,6 +308,11 @@ def main(argv=None):
             if len(checkable) > args.footprints_limit:
                 fp_note = "checked the first %d of %d hits" % (args.footprints_limit, len(checkable))
 
+    def is_hot(fp):
+        return bool(fp) and (fp["edits"] >= 2 or fp["fixes"] or fp["complaints"])
+
+    hot = sum(1 for h in hits if is_hot(h.get("footprints")))
+
     shown, hidden = [], {}
     per_kind = {}
     for h in hits:
@@ -331,6 +336,7 @@ def main(argv=None):
         "hits": shown,
         "hidden_over_cap": hidden,
         "footprints": fp_note or ("on" if args.footprints else "off"),
+        "footprints_hot": hot if args.footprints else None,
     }
 
     if args.json:
@@ -346,7 +352,14 @@ def main(argv=None):
     if skipped["large_files"]:
         print("Skipped large files: %s" % ", ".join(skipped["large_files"]))
     if args.footprints:
-        print("Footprints: %s" % (fp_note or "on"))
+        if fp_note and fp_note.startswith("not a git"):
+            print("Footprints: %s" % fp_note)
+        elif hot:
+            print("Footprints: %d hot rules (edited 2+ times, or touched by fix or complaint commits)%s"
+                  % (hot, "; " + fp_note if fp_note else ""))
+        else:
+            print("Footprints: ran, no hot rules found (nothing edited 2+ times or touched by fix or "
+                  "complaint commits)%s" % ("; " + fp_note if fp_note else ""))
     if not hits:
         print("No decision points found.")
         return 0
@@ -361,7 +374,7 @@ def main(argv=None):
             also = (" +" + ",".join(h["also"])) if h["also"] else ""
             print("  %s%s%s  %s" % (where, fn, also, h["snippet"]))
             fp = h.get("footprints")
-            if fp and (fp["edits"] >= 2 or fp["fixes"] or fp["complaints"]):
+            if is_hot(fp):
                 print("    footprints: edited %d times (%d in the last 90 days), %d fix-like, %d complaint commits"
                       % (fp["edits"], fp["recent_90d"], fp["fixes"], fp["complaints"]))
         if hidden.get(kind):

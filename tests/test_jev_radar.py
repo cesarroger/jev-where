@@ -122,6 +122,16 @@ class RadarTests(unittest.TestCase):
         self.assertGreaterEqual(fp["edits"], 3)
         self.assertGreaterEqual(fp["fixes"], 1)
         self.assertGreaterEqual(fp["complaints"], 1)
+        self.assertGreaterEqual(data["footprints_hot"], 1)
+        self.assertIn("hot rules", radar(self.root, "--footprints"))
+
+    def test_footprints_say_when_nothing_is_hot(self):
+        env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.com",
+                   GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@example.com")
+        for args in (["init", "-q"], ["add", "app"], ["commit", "-q", "-m", "initial"]):
+            subprocess.run(["git", "-C", self.root, *args], check=True, capture_output=True, env=env)
+        self.assertIn("no hot rules found", radar(self.root, "--footprints"))
+        self.assertEqual(json.loads(radar(self.root, "--json", "--footprints"))["footprints_hot"], 0)
 
     def test_footprints_skip_quietly_outside_git(self):
         data = json.loads(radar(self.root, "--json", "--footprints"))

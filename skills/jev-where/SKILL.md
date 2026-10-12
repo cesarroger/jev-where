@@ -314,7 +314,9 @@ fetched in this run contains it. `references/patterns.md` has the full list.
 each with a one-line reason and what would change your mind (for example
 "route on the form's category field; revisit if tickets start arriving by
 email without one"). This shows the user the scan was thorough, not just
-optimistic.
+optimistic. If part of a decision stays in code inside a Jev idea (for example
+a precise regex kept as a fast first pass in front of Jev), say so in that
+idea's confidence handling and don't list it again here.
 
 ### 7. Offer a starter integration and the Treasure Map
 
@@ -375,18 +377,30 @@ Then a ranking table (rank, idea, shape, effort, value, risk). Then each idea:
 - **Effort:** S | M | L
 ```
 
-After the ideas, when there are grounded ones:
+After the ideas, add these sections in this order. Skip a section when it
+would be empty, except Not Jev's Job and Off the Map: those always appear, and
+"none" is a fine answer.
+
+1. **One request, several questions**, when ideas share input
+2. **Power Jewels**, when any are grounded in data the app already has
+3. **Not Jev's Job**
+4. **Off the Map**
+5. **Existing Jev use**, when the app already calls Jev
+6. **Since the last map**, when an earlier `jev-where-map.json` exists (format
+   in `references/treasure-map.md`)
+7. **Also noticed**, when you found side risks
+8. **Start here**, always last, ending with the offer
 
 ```markdown
+## One request, several questions
+- **<input, e.g. each new ticket>:** ideas <n>, <n>, <n> can go in one Jev
+  request. Each answer is independent, so code can use or ignore each one.
+
 ## Power Jewels
 New things Jev could add, using data the app already has.
 - **<Title>:** where the data lives (`path:line`), the typed question, what the
   app would do with the answer, What Jev Sees, and a precedent if one fits
-```
 
-Then:
-
-```markdown
 ## Not Jev's Job
 - `path:line` (`function`): why plain code should keep this. What would change
   my mind: <condition>
@@ -395,39 +409,15 @@ Then:
 - <folder, app, or area not scanned>: why (skipped as dependencies or build
   output, a separate app, too large, secret files). To cover it next:
   `/jev-where <path>`
-```
 
-After the ideas, when any share input:
-
-```markdown
-## One request, several questions
-- **<input, e.g. each new ticket>:** ideas <n>, <n>, <n> can go in one Jev
-  request. Each answer is independent, so code can use or ignore each one.
-```
-
-If the app already uses Jev, add before "Start here":
-
-```markdown
 ## Existing Jev use
 - `path:line`: what it asks today, and what to improve (question wording,
   cutoffs, fallback, grouping with other questions)
-```
 
-If an earlier `jev-where-map.json` exists, add before "Start here" the
-"Since the last map" section described in `references/treasure-map.md`.
-
-If you noticed risks while reading that aren't Jev ideas, add before
-"Start here":
-
-```markdown
 ## Also noticed
 - `path:line`: the risk, such as a hardcoded secret (location only, never the
   value) or an unguarded API call that can crash a request
-```
 
-Then:
-
-```markdown
 ## Start here
 <The single best first experiment, and why.> Evaluate it on a small labeled set
 of real inputs: run the current approach and Jev side by side, then compare
