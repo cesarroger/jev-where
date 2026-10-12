@@ -53,7 +53,7 @@ Plus:
 - **Starter code, only if you ask:** a minimal integration in your app's
   language, built from the current TypeSafe docs, with an evaluation harness.
 
-See a full example report: [examples/sample-report-offline.md](examples/sample-report-offline.md) (run with no network).
+See a full example report: [examples/sample-report.md](examples/sample-report.md), and the same app with no network: [examples/sample-report-offline.md](examples/sample-report-offline.md).
 
 ## How it works
 
@@ -179,7 +179,7 @@ jev-where/
 │       ├── patterns.md              decision point → Choice / Score / Noul, default cutoffs
 │       └── starter-integration.md   used only when you ask for starter code
 ├── evals/                           `claude plugin eval` suite and fixture app
-├── examples/sample-report.md        a full run on the fixture app
+├── examples/                        full runs on the fixture app, with and without network
 └── assets/
     ├── banner.svg                   the seek-and-find banner (can you spot Jev?)
     ├── how-it-works.svg             the hand-drawn diagram, fonts embedded
