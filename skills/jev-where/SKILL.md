@@ -66,21 +66,28 @@ passes it as an `ARGUMENTS:` line.
 
 ## Keep the main conversation light
 
-Reading a codebase and the awesome-jev list produces a lot of text. If you can
-start a subagent (for example with the Agent tool in Claude Code), hand it
-steps 1 and 2, and the fetching in step 4. Give it the ground rules above
-(including the secrets rule), the scope, and exactly what to return:
+Reading a codebase produces a lot of text. If you can start a subagent (for
+example with the Agent tool in Claude Code), run it in the foreground and hand
+it steps 1 and 2 only. Give it the ground rules above (including the secrets
+rule), the scope, and exactly what to return:
 
-- a compact list of decision points: location, what the code does today,
-  visible volume, and the cost of a wrong answer
-- for each decision point, at most 5 candidate entry lines from the fetched
-  category files, copied verbatim, picked for a matching domain or decision
-  shape
-- the fetch log: each URL and whether it worked
+- files read, and folders skipped and why
+- separate apps found, if the folder holds several
+- existing Jev calls in code (location only), or "none"
+- a compact list of decision points: `path:line` and function, what the code
+  does today, visible volume and where that figure comes from, and the cost of
+  a wrong answer
+- which decision points read the same input
+- side risks noticed while reading (location and kind only, never a secret
+  value)
 
-Tell it not to return whole category files or its own analysis prose. Do the
-mapping, ranking, and report yourself. If you can't start a subagent, do every
-step yourself.
+Tell it not to return whole files or its own analysis prose.
+
+Do step 4 (the precedent fetch) yourself, in the main conversation. Its
+commands are pre-approved for this turn, pages are saved to files rather than
+read whole, and only the matching lines come back, so it stays small. Then do
+the mapping, ranking, and report. If you can't start a subagent, do every step
+yourself.
 
 ## Workflow
 
@@ -158,10 +165,13 @@ no stored copy.
 **How to fetch.** You need exact names and URLs, so prefer a method that
 returns the raw text:
 
-- **Best:** make a new empty directory with `mktemp -d`, save each page into it
-  with `curl -sSL <url> -o <dir>/<file>`, then use Grep on the saved file for
-  the lines you need instead of reading all of it. These exact commands are
-  pre-approved for the turn that runs the skill.
+- **Best:** run `mktemp -d` as a command on its own and note the path it
+  prints. Then fetch each page with one plain command,
+  `curl -sSL <url> -o <that path>/<name>.md`, typing the literal path: no
+  other options, no variables, and no `&&`, pipes, or loops. Then search the
+  saved files with the built-in Grep tool, not shell `grep` or `awk`. Used
+  exactly this way, these commands are pre-approved for the turn that runs the
+  skill, so they don't stop for permission.
 - **Next:** a read-only GitHub file tool, if one is available.
 - **Last:** WebFetch. It may paraphrase long lines, so ask it for each entry's
   name and URL exactly, and treat its summaries as approximate.
@@ -196,9 +206,11 @@ returns the raw text:
    `https://raw.githubusercontent.com/yibie/awesome-jev/main/categories/<file>.md`
    and keep only the entry lines, which look like
    `- [Name](URL) - Industry: one-sentence summary`.
-4. **Match.** For each idea, pick entries whose decision shape and domain fit.
-   Cite only entries from category files fetched in this run. Copy the name and
-   URL exactly from the fetched text.
+4. **Match.** Search the saved category files for each decision point's domain
+   and shape words, and keep at most 3 candidates per decision point. Note
+   each candidate's category. If one entry fits several decision points, keep
+   it once and refer back to it. Cite only entries from category files fetched
+   in this run, and copy the name and URL exactly from the fetched text.
 5. **Prefer stronger evidence.** The list admits entries without reviewing
    them, and it warns that bulk submissions by one author can be unproven.
    Prefer entries whose summary mentions working code, tests, a benchmark, or
