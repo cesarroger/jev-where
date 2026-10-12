@@ -11,6 +11,7 @@ request format, field names, SDKs, and auth, check the official docs.
 - Patterns 1 to 14
 - When Jev is the wrong tool
 - Confidence handling: starting points
+- What Jev Sees: data levels
 
 ## What the sources state
 
@@ -260,3 +261,20 @@ no auto-refund and the ticket goes on to the billing queue.
   is never worse than today. If the current approach takes an irreversible
   action (moves money, deletes data, bans a user), fail closed instead and send
   the case to a person.
+
+## What Jev Sees: data levels
+
+Every Jev question sends state to TypeSafe's service. Say what kind of data
+that is, and how to send less.
+
+| Level | Examples | Send-less tip |
+| --- | --- | --- |
+| Public | published product names, public posts, help-center titles | Fine as is |
+| Internal | team names, queue names, internal policies, feature flags | Send only the fields the question names |
+| Personal | customer messages, names, emails, addresses, order history | Strip signatures, emails, phone numbers, and addresses unless the question needs them; send the message text, not the whole record |
+| Sensitive | payment details, health, legal, children's data, credentials-adjacent text | Send derived facts instead of raw data (for example "charged twice: yes" from your own records); check your data policy and TypeSafe's terms first |
+| Secret | API keys, passwords, tokens, private keys | Never send. Mask before building state |
+
+Pick the highest level present in the state. When a question only needs a
+yes/no fact your code already knows, compute it in code and leave the raw data
+out.

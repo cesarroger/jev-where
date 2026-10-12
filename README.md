@@ -23,10 +23,15 @@ in, a typed decision out (a **Choice**, a **Score**, or a **Noul** yes/no
 probability), each with its probabilities.
 
 **JEV WHERE?** reads your app and finds them for you. For every decision point
-it writes the exact typed question, says what to do when Jev is unsure, cites
-real projects doing something similar, and ranks the ideas so you know which
-experiment to run first. It only analyzes and suggests. It never edits your
-code.
+it writes the exact typed question, says what to do when Jev is unsure, and
+ranks the ideas so you know which experiment to run first. It only analyzes
+and suggests. It never edits your code.
+
+**What makes it different:** every idea cites real projects doing something
+similar, **fetched live from [awesome-jev](https://github.com/yibie/awesome-jev)
+on every run**, never from a stale copy or memory. Every report flags hardcoded
+secrets and unguarded API calls along the way, and shows exactly what data each
+idea would send to Jev.
 
 ## What you get
 
@@ -38,20 +43,46 @@ For each idea:
 | **Today** | What the code does now, and where it breaks |
 | **Jev decision** | Choice, Score or Noul, the exact question, and its options or levels |
 | **Confidence handling** | Starting cutoffs (labelled as such) and a safe fallback when Jev is unsure |
-| **Precedent** | 1 to 2 real projects from [awesome-jev](https://github.com/yibie/awesome-jev), fetched live every run |
+| **What Jev Sees** | What kind of data the question sends (public, internal, personal, sensitive) and how to send less |
+| **Footprints** | Git history clues: a rule edited 7 times, with 2 "fix false positive" commits, is begging for help |
+| **Precedent** | 1 to 2 real projects from awesome-jev, fetched live every run |
 | **Benefit, risk, poor fit** | An honest case for and against |
+| **Why this rank** | The ranking math in plain words, so you can check or argue with it |
 | **Effort** | S, M or L |
 
 Plus:
 
+- **Power Jewels:** new things Jev could add, built only on data your app
+  already has.
 - **One request, several questions:** ideas that read the same input are
   grouped into a single Jev call.
-- **Existing Jev use:** if the app already calls Jev, its questions,
-  cutoffs and fallbacks are reviewed too.
+- **Not Jev's Job:** decisions plain code should keep, and what would change
+  that.
+- **Off the Map:** what the scan didn't cover, and the command to cover it.
+- **Existing Jev use:** if the app already calls Jev, its questions, cutoffs
+  and fallbacks are reviewed too.
 - **Start here:** the single best first experiment and how to evaluate it on a
   small labeled set.
 - **Starter code, only if you ask:** a minimal integration in your app's
   language, built from the current TypeSafe docs, with an evaluation harness.
+- **Treasure Map, only if you ask:** the report as `jev-where-map.json`. Run
+  `/jev-where` again later and it shows what changed since the last map: new
+  spots, ideas that now use Jev, rules that cooled down.
+
+### Jev's Radar
+
+Before Claude reads anything, a small scanner sweeps the code and lists every
+likely decision point as `file:line`: regex rules, keyword lists, yes/no LLM
+calls, thresholds, routing, gates and rankings. It skips dependency, build and
+secret files, never prints secret values, and adds Footprints from git
+history. It's plain Python with nothing to install, and you can run it on its
+own:
+
+```bash
+python3 skills/jev-where/scripts/jev_radar.py /path/to/your/app --footprints
+```
+
+Add `--json` for machine-readable output.
 
 See a full example report: [examples/sample-report.md](examples/sample-report.md), and the same app with no network: [examples/sample-report-offline.md](examples/sample-report-offline.md).
 
@@ -157,14 +188,20 @@ claude plugin eval . --tag trigger
 ```
 
 ```bash
-claude plugin eval . --tag network --allow-tools "WebFetch(domain:raw.githubusercontent.com)" "WebFetch(domain:api.github.com)"
+claude plugin eval . --tag network --allow-tools "Bash(python3 *)" "WebFetch(domain:raw.githubusercontent.com)" "WebFetch(domain:api.github.com)"
 ```
 
 ```bash
-claude plugin eval . --tag offline
+claude plugin eval . --tag offline --allow-tools "Bash(python3 *)"
 ```
 
 Add `--runs 1 --ablation none` while iterating to cut the cost.
+
+Jev's Radar has its own quick unit tests, which need no Claude session:
+
+```bash
+python3 -m unittest discover -s tests
+```
 
 ## Project layout
 
@@ -175,9 +212,12 @@ jev-where/
 │   └── marketplace.json             lets `claude plugin install` find it
 ├── skills/jev-where/
 │   ├── SKILL.md                     the workflow
+│   ├── scripts/jev_radar.py         Jev's Radar: the read-only scanner, with Footprints
 │   └── references/
-│       ├── patterns.md              decision point → Choice / Score / Noul, default cutoffs
-│       └── starter-integration.md   used only when you ask for starter code
+│       ├── patterns.md              decision point → Choice / Score / Noul, cutoffs, data levels
+│       ├── starter-integration.md   used only when you ask for starter code
+│       └── treasure-map.md          the jev-where-map.json format, used only when you ask
+├── tests/                           unit tests for Jev's Radar
 ├── evals/                           `claude plugin eval` suite and fixture app
 ├── examples/                        full runs on the fixture app, with and without network
 └── assets/

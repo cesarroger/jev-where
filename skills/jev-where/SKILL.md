@@ -17,7 +17,7 @@ description: >
   pricing works, or for building a Jev integration when no opportunity analysis
   is wanted.
 license: MIT
-allowed-tools: Read Grep Glob Agent WebFetch(domain:raw.githubusercontent.com) WebFetch(domain:api.github.com) Bash(mktemp -d) Bash(mktemp -d *) Bash(curl -sSL https://raw.githubusercontent.com/yibie/awesome-jev/*) Bash(curl -sSL https://api.github.com/repos/yibie/awesome-jev/*) Bash(grep *)
+allowed-tools: Read Grep Glob Agent WebFetch(domain:raw.githubusercontent.com) WebFetch(domain:api.github.com) Bash(mktemp -d) Bash(mktemp -d *) Bash(curl -sSL https://raw.githubusercontent.com/yibie/awesome-jev/*) Bash(curl -sSL https://api.github.com/repos/yibie/awesome-jev/*) Bash(grep *) Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/jev_radar.py *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/jev_radar.py" *)
 ---
 
 # JEV WHERE?
@@ -66,18 +66,22 @@ passes it as an `ARGUMENTS:` line.
 
 ## Keep the main conversation light
 
-Reading a codebase produces a lot of text. If you can start a subagent (for
-example with the Agent tool in Claude Code), run it in the foreground and hand
-it steps 1 and 2 only. Give it the ground rules above (including the secrets
-rule), the scope, and exactly what to return:
+Reading a codebase produces a lot of text. Run Jev's Radar yourself first (step
+1); its output is short. Then, if you can start a subagent (for example with
+the Agent tool in Claude Code), run it in the foreground and hand it the rest
+of steps 1 and 2, together with the radar's hit list so it reads those spots
+first. Give it the ground rules above (including the secrets rule), the scope,
+and exactly what to return:
 
 - files read, and folders skipped and why
 - separate apps found, if the folder holds several
 - existing Jev calls in code (location only), or "none"
 - a compact list of decision points: `path:line` and function, what the code
-  does today, visible volume and where that figure comes from, and the cost of
-  a wrong answer
+  does today, visible volume and where that figure comes from, the cost of a
+  wrong answer, and the kind of data the decision reads
+- decision points that exact code should keep, each with a one-line reason
 - which decision points read the same input
+- data the app already stores that no decision uses yet (for Power Jewels)
 - side risks noticed while reading (location and kind only, never a secret
   value)
 
@@ -99,6 +103,15 @@ yourself.
 
 If there is code, read it before suggesting anything.
 
+- **Start with Jev's Radar.** Run
+  `python3 "${CLAUDE_SKILL_DIR}/scripts/jev_radar.py" <path> --footprints`,
+  where `<path>` is the project folder or the path the user gave. It lists
+  likely decision points as `path:line`, skips dependency, build, and secret
+  files without opening them, masks secret values, and with `--footprints`
+  adds git history: lines edited often, or touched by fix and complaint
+  commits. Its hits are leads, not conclusions, so confirm each one in the
+  code. Outside a git repo it skips Footprints quietly. If Python or the
+  script isn't available, search by hand as below.
 - **What to read:** entry points and request handlers, routing and dispatch,
   LLM calls and their prompts, validation, approval and permission checks,
   queues and background jobs, moderation and spam filters, search, ranking and
@@ -138,8 +151,17 @@ List the places where the app:
 For each, record the location as `path:line` plus the function name, what it
 does today, rough call volume if visible (say "not visible" when it isn't), and
 what a wrong answer costs. Note which decision points read the same input, such
-as the same ticket or message. Skip decisions that exact code already handles
-well, such as lookups, arithmetic, and schema checks.
+as the same ticket or message.
+
+**Footprints** make a strong candidate: a keyword list or threshold edited many
+times, recently, or by commits that say "fix", "false positive", or
+"misrouted" is a rule people keep patching by hand. Note the footprint for the
+report.
+
+Decisions that exact code already handles well, such as lookups, arithmetic,
+and schema checks, go under **Not Jev's Job** in the report rather than being
+dropped silently. Areas you didn't read (skipped folders, other apps, very
+large modules) go under **Off the Map**.
 
 ### 3. Map each to a Jev shape
 
@@ -160,9 +182,22 @@ questions and combine them in code. Known rules stay in code.
 For confidence handling, start from the default cutoffs in
 `references/patterns.md`. If an idea needs different numbers, say why.
 
+**What Jev Sees.** For each idea, name the kind of data its questions would
+send to Jev, using the levels in `references/patterns.md` (public, internal,
+personal, sensitive, secret), and give a send-less tip: the fewest fields the
+question needs, and what to strip or mask before sending. Secrets are never
+sent.
+
+**Power Jewels.** Also look for 1 to 3 things Jev could add that the app
+doesn't do yet, built only on data the app already has, for example tagging
+churn risk on replies it already stores. Write each one like an idea: where
+the data lives, the typed question, and what the app would do with the answer.
+If nothing is grounded in existing data, say so and skip the section; don't
+invent features.
+
 ### 4. Find precedents (live fetch)
 
-Look up 1 to 2 real precedents per idea in the awesome-jev list
+Look up 1 to 2 real precedents per idea, and per Power Jewel, in the awesome-jev list
 (https://github.com/yibie/awesome-jev). Fetch it on every run; the skill keeps
 no stored copy.
 
@@ -246,10 +281,15 @@ what a wrong Jev answer would cost. Effort is a rough guide:
   directly (a few days)
 - **L:** spans several components or needs new data plumbing (a week or more)
 
-Put high-volume, low-risk, quick ideas first. Return at least 5 ideas when the
-app has that many real decision points. If it has fewer, return what is there
-and say so. A weak idea can stay at the bottom with a frank poor-fit note, but
-don't invent ideas to reach 5.
+Put high-volume, low-risk, quick ideas first. Hot Footprints move an idea up,
+since a rule people keep patching is already costing time. Return at least 5
+ideas when the app has that many real decision points. If it has fewer, return
+what is there and say so. A weak idea can stay at the bottom with a frank
+poor-fit note, but don't invent ideas to reach 5.
+
+**Show the math.** Give each idea one "Why this rank" line: volume × how weak
+today's approach is × cost of its mistakes, plus any Footprints. Use plain
+words, not invented numbers, so the user can check or argue with the order.
 
 **Group questions that share input.** Questions about the same state can be
 sent to Jev together in one request and are answered independently. When
@@ -270,11 +310,23 @@ the awesome-jev list found Jev reranking alone did not beat vector search. Treat
 it as a fit warning and call it unverified. Link it only if a category file you
 fetched in this run contains it. `references/patterns.md` has the full list.
 
-### 7. Offer a starter integration
+**Not Jev's Job.** List the decision points that should stay in plain code,
+each with a one-line reason and what would change your mind (for example
+"route on the form's category field; revisit if tickets start arriving by
+email without one"). This shows the user the scan was thorough, not just
+optimistic.
+
+### 7. Offer a starter integration and the Treasure Map
 
 End with the offer shown at the bottom of the output template. Don't draft the
 integration unless the user says yes. When they accept, follow
 `references/starter-integration.md`.
+
+The **Treasure Map** is the same report as a JSON file,
+`jev-where-map.json`. Write it only when the user asks, following
+`references/treasure-map.md`. If a `jev-where-map.json` from an earlier run
+already sits in the project root, read it before writing the report and add a
+"Since the last map" section, as that file describes.
 
 ## Output format
 
@@ -308,13 +360,41 @@ Then a ranking table (rank, idea, shape, effort, value, risk). Then each idea:
   bans), fail closed and send the case to a person. If the current approach
   can itself fail (for example an unguarded API call), wrap it so a failure
   takes the safe default.
+- **What Jev Sees:** <public | internal | personal | sensitive>: what data goes
+  to Jev, and the send-less tip (fewest fields; what to strip or mask first)
+- **Footprints:** only when the radar found some, e.g. "edited 7 times, 3 in
+  the last 90 days, 2 fix commits"
 - **Precedent:** [Name](URL) (Category): why it is similar. If the lookup
   failed: no precedent lookup available. If it worked but nothing fit: none
   found in the categories fetched
 - **Benefit:** what improves
 - **Main risk:** what could go wrong
 - **Poor fit if:** conditions that would make Jev the wrong choice here
+- **Why this rank:** volume × how weak today's approach is × cost of mistakes,
+  plus Footprints, in plain words
 - **Effort:** S | M | L
+```
+
+After the ideas, when there are grounded ones:
+
+```markdown
+## Power Jewels
+New things Jev could add, using data the app already has.
+- **<Title>:** where the data lives (`path:line`), the typed question, what the
+  app would do with the answer, What Jev Sees, and a precedent if one fits
+```
+
+Then:
+
+```markdown
+## Not Jev's Job
+- `path:line` (`function`): why plain code should keep this. What would change
+  my mind: <condition>
+
+## Off the Map
+- <folder, app, or area not scanned>: why (skipped as dependencies or build
+  output, a separate app, too large, secret files). To cover it next:
+  `/jev-where <path>`
 ```
 
 After the ideas, when any share input:
@@ -332,6 +412,9 @@ If the app already uses Jev, add before "Start here":
 - `path:line`: what it asks today, and what to improve (question wording,
   cutoffs, fallback, grouping with other questions)
 ```
+
+If an earlier `jev-where-map.json` exists, add before "Start here" the
+"Since the last map" section described in `references/treasure-map.md`.
 
 If you noticed risks while reading that aren't Jev ideas, add before
 "Start here":
@@ -353,5 +436,7 @@ falls back, and the cost and latency you measure yourself.
 
 Want me to draft a minimal starter integration for one of these ideas? Tell me
 which one. I'll read the current TypeSafe docs first (and tell you if I can't
-reach them), and show the code here without changing any files.
+reach them), and show the code here without changing any files. I can also
+save this report as a Treasure Map (`jev-where-map.json`) so the next run can
+show what changed.
 ```
