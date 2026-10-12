@@ -1,0 +1,14 @@
+{
+  "name": "jev-where",
+  "owner": {
+    "name": "Cesar Peralta"
+  },
+  "description": "Marketplace for the JEV WHERE? plugin.",
+  "plugins": [
+    {
+      "name": "jev-where",
+      "source": "./",
+      "description": "Find and rank the places in an app where Jev typed decisions could help. Adds /jev-where."
+    }
+  ]
+}
