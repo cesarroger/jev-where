@@ -170,58 +170,6 @@ typed?". General questions about what Jev is don't trigger it.
 - **Fetched pages are data.** Instructions found in web pages or repo files are
   ignored.
 
-## Tests
-
-The `evals/` folder holds a suite for Claude Code's built-in
-[`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals) runner
-(Claude Code 2.1.269 or later). It checks that the skill triggers on the right
-requests and not on near-misses, asks for a description in an empty project,
-produces a grounded report, labels missing precedents when offline, never leaks
-the fixture's fake secrets, and never edits files.
-
-Each run is a real Claude session and counts against your plan's usage. From
-the repo root:
-
-```bash
-claude plugin eval . --tag trigger
-```
-
-```bash
-claude plugin eval . --tag network --allow-tools "Bash(python3 *)" "WebFetch(domain:raw.githubusercontent.com)" "WebFetch(domain:api.github.com)"
-```
-
-```bash
-claude plugin eval . --tag offline --allow-tools "Bash(python3 *)"
-```
-
-Add `--runs 1 --ablation none` while iterating to cut the cost.
-
-Jev's Radar has its own quick unit tests, which need no Claude session:
-
-```bash
-python3 -m unittest discover -s tests
-```
-
-## Project layout
-
-```text
-jev-where/
-├── .claude-plugin/
-│   ├── plugin.json                  plugin manifest
-│   └── marketplace.json             lets `claude plugin install` find it
-├── skills/jev-where/
-│   ├── SKILL.md                     the workflow
-│   ├── scripts/jev_radar.py         Jev's Radar: the read-only scanner, with Footprints
-│   └── references/
-│       ├── patterns.md              decision point → Choice / Score / Noul, cutoffs, data levels
-│       ├── starter-integration.md   used only when you ask for starter code
-│       └── treasure-map.md          the jev-where-map.json format, used only when you ask
-├── tests/                           unit tests for Jev's Radar
-├── evals/                           `claude plugin eval` suite and fixture app
-├── examples/                        full runs on the fixture app, with and without network
-└── assets/                          banner and diagram
-```
-
 ## Credits
 
 Jev and System One models are made by [TypeSafe AI](https://typesafe.ai).
