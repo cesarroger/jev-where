@@ -17,7 +17,7 @@ description: >
   pricing works, or for building a Jev integration when no opportunity analysis
   is wanted.
 license: MIT
-allowed-tools: Read Grep Glob Agent WebFetch(domain:raw.githubusercontent.com) WebFetch(domain:api.github.com) Bash(mktemp -d) Bash(mktemp -d *) Bash(curl -sSL https://raw.githubusercontent.com/yibie/awesome-jev/*) Bash(curl -sSL https://api.github.com/repos/yibie/awesome-jev/*)
+allowed-tools: Read Grep Glob Agent WebFetch(domain:raw.githubusercontent.com) WebFetch(domain:api.github.com) Bash(mktemp -d) Bash(mktemp -d *) Bash(curl -sSL https://raw.githubusercontent.com/yibie/awesome-jev/*) Bash(curl -sSL https://api.github.com/repos/yibie/awesome-jev/*) Bash(grep *)
 ---
 
 # JEV WHERE?
@@ -81,7 +81,11 @@ rule), the scope, and exactly what to return:
 - side risks noticed while reading (location and kind only, never a secret
   value)
 
-Tell it not to return whole files or its own analysis prose.
+Tell it not to return whole files or its own analysis prose. Tell it how to
+read without triggering permission prompts: open files with the Read tool,
+find them with Glob (or one plain `ls` or `find`), search with the Grep tool
+(or one plain `grep`), and keep every shell command single and plain, with no
+`cd &&`, pipes, or loops.
 
 Do step 4 (the precedent fetch) yourself, in the main conversation. Its
 commands are pre-approved for this turn, pages are saved to files rather than
@@ -167,11 +171,13 @@ returns the raw text:
 
 - **Best:** run `mktemp -d` as a command on its own and note the path it
   prints. Then fetch each page with one plain command,
-  `curl -sSL <url> -o <that path>/<name>.md`, typing the literal path: no
-  other options, no variables, and no `&&`, pipes, or loops. Then search the
-  saved files with the built-in Grep tool, not shell `grep` or `awk`. Used
-  exactly this way, these commands are pre-approved for the turn that runs the
-  skill, so they don't stop for permission.
+  `curl -sSL <url> -f -o <that path>/<name>.md`, typing the literal path: no
+  other options, no variables, and no `&&`, pipes, or loops. The `-f` makes a
+  missing page fail instead of saving an error page as if it were the list.
+  Then search the saved files with the Grep tool if this session has one;
+  otherwise use one plain `grep -n -i -E '<pattern>' <file>` command per
+  search. Used exactly this way, these commands are pre-approved for the turn
+  that runs the skill, so they don't stop for permission.
 - **Next:** a read-only GitHub file tool, if one is available.
 - **Last:** WebFetch. It may paraphrase long lines, so ask it for each entry's
   name and URL exactly, and treat its summaries as approximate.
@@ -205,7 +211,9 @@ returns the raw text:
 3. **Fetch.** Get each chosen file from
    `https://raw.githubusercontent.com/yibie/awesome-jev/main/categories/<file>.md`
    and keep only the entry lines, which look like
-   `- [Name](URL) - Industry: one-sentence summary`.
+   `- [Name](URL) - Industry: one-sentence summary`. Each file also has a
+   template line in that same shape under "Submission format", literally
+   `- [Name](URL) - ...`. Skip it; it isn't an entry.
 4. **Match.** Search the saved category files for each decision point's domain
    and shape words, and keep at most 3 candidates per decision point. Note
    each candidate's category. If one entry fits several decision points, keep
@@ -218,7 +226,8 @@ returns the raw text:
    Use discussion threads only when no project entry fits.
 
 **If the lookup fails** (no fetch tool, network error, HTTP 403, 404, or 429,
-or the page no longer has the expected structure), say so in one plain
+a `curl -f` command that exits with an error, or a page that no longer has the
+expected structure), say so in one plain
 sentence with the reason, for example: "Precedent lookup failed:
 raw.githubusercontent.com returned 429." Try the fallback listing only when the
 README itself failed or changed. With no network or no fetch tool, skip it.
@@ -246,7 +255,10 @@ don't invent ideas to reach 5.
 sent to Jev together in one request and are answered independently. When
 several ideas read the same input (the same ticket, message, or document),
 list them as one group so the user sees one call, not several separate
-projects.
+projects. If the app stops early for some inputs (for example a hold that
+skips the rest of the pipeline), say which is better: one request for
+everything, which is simplest but wastes the unused answers, or two stages,
+with the gate question first and the rest only when it passes.
 
 ### 6. Be honest about fit
 
@@ -296,8 +308,9 @@ Then a ranking table (rank, idea, shape, effort, value, risk). Then each idea:
   bans), fail closed and send the case to a person. If the current approach
   can itself fail (for example an unguarded API call), wrap it so a failure
   takes the safe default.
-- **Precedent:** [Name](URL) (Category): why it is similar. Or: no precedent
-  lookup available
+- **Precedent:** [Name](URL) (Category): why it is similar. If the lookup
+  failed: no precedent lookup available. If it worked but nothing fit: none
+  found in the categories fetched
 - **Benefit:** what improves
 - **Main risk:** what could go wrong
 - **Poor fit if:** conditions that would make Jev the wrong choice here
