@@ -1,0 +1,34 @@
+<!doctype html>
+<!--
+  One-off renderer: turns how-it-works.excalidraw into a self-contained SVG using
+  Excalidraw's own exportToSvg, loaded from a CDN (nothing to install).
+  Usage: paste the .excalidraw JSON into the <script id="scene"> tag (or let the
+  helper command in the README do it), open this page in a browser, and copy the
+  SVG from the text box. Fonts are embedded in the SVG, so it renders the same on GitHub.
+-->
+<html>
+<head><meta charset="utf-8"><title>render</title></head>
+<body>
+<script id="scene" type="application/json">__SCENE__</script>
+<textarea id="out" rows="4" cols="80"></textarea>
+<script type="module">
+  window.EXCALIDRAW_ASSET_PATH = "https://cdn.jsdelivr.net/npm/@excalidraw/excalidraw@0.18.1/dist/prod/";
+  const out = document.getElementById("out");
+  try {
+    const lib = await import("https://esm.sh/@excalidraw/excalidraw@0.18.1?deps=react@18.3.1,react-dom@18.3.1");
+    const scene = JSON.parse(document.getElementById("scene").textContent);
+    const svg = await lib.exportToSvg({
+      elements: lib.restoreElements(scene.elements, null),
+      appState: { ...scene.appState, exportBackground: true, exportWithDarkMode: false, exportEmbedScene: false },
+      files: scene.files || {},
+      exportPadding: 36,
+    });
+    out.textContent = svg.outerHTML;
+    document.title = "DONE";
+  } catch (e) {
+    out.textContent = "ERROR: " + (e && e.stack || e);
+    document.title = "ERROR";
+  }
+</script>
+</body>
+</html>

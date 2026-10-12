@@ -57,14 +57,11 @@ See a full example report: [examples/sample-report-offline.md](examples/sample-r
 
 ## How it works
 
-```mermaid
-flowchart LR
-  A["Your app<br/>(code or a description)"] --> B["Find fuzzy decisions<br/>regex · label-only LLM calls<br/>routing · gates · ranking"]
-  B --> C["Write the typed question<br/>Choice · Score · Noul"]
-  C --> D["Fetch live precedents<br/>awesome-jev category files"]
-  D --> E["Ranked report<br/>value · effort · risk"]
-  E -. "you say yes" .-> F["Starter integration<br/>from the current TypeSafe docs"]
-```
+<p align="center">
+  <img src="assets/how-it-works.svg" alt="How it works: 1 your app, 2 find fuzzy decisions, 3 write the typed question (Choice, Score, Noul), 4 fetch live precedents, 5 ranked report, 6 starter code, only if you say yes." width="100%">
+</p>
+
+<sub>Drawn in <a href="https://excalidraw.com">Excalidraw</a>. To edit it, open <code>assets/src/how-it-works.excalidraw</code> there.</sub>
 
 ## Install
 
@@ -185,8 +182,13 @@ jev-where/
 ├── examples/sample-report.md        a full run on the fixture app
 └── assets/
     ├── banner.svg                   the seek-and-find banner (can you spot Jev?)
+    ├── how-it-works.svg             the hand-drawn diagram, fonts embedded
     ├── social-preview.png           1280×640 card for the repo's social preview
-    └── src/make_banner.py           regenerates banner.svg (change SEED to reshuffle the crowd)
+    └── src/
+        ├── make_banner.py           regenerates banner.svg (change SEED to reshuffle the crowd)
+        ├── make_diagram.py          writes how-it-works.excalidraw
+        ├── how-it-works.excalidraw  open at excalidraw.com to edit by hand
+        └── render_diagram.html      renders the .excalidraw file to SVG with Excalidraw's exporter, loaded from a CDN
 ```
 
 ## Credits

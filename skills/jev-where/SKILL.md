@@ -143,10 +143,15 @@ Look up 1 to 2 real precedents per idea in the awesome-jev list
 (https://github.com/yibie/awesome-jev). Fetch it on every run; the skill keeps
 no stored copy.
 
-**How to fetch.** Prefer WebFetch and ask it to return only the lines you
-need, verbatim. Without WebFetch, use
-`curl -sSL <url> -o <file>` into a new empty temporary directory, then search
-the saved file for the lines you need instead of reading all of it.
+**How to fetch.** You need exact names and URLs, so prefer a method that
+returns the raw text:
+
+- **Best:** `curl -sSL <url> -o <file>` into a new empty temporary directory,
+  then search the saved file for the lines you need instead of reading all of
+  it.
+- **Next:** a read-only GitHub file tool, if one is available.
+- **Last:** WebFetch. It may paraphrase long lines, so ask it for each entry's
+  name and URL exactly, and treat its summaries as approximate.
 
 1. **Category list.** Fetch
    `https://raw.githubusercontent.com/yibie/awesome-jev/main/README.md` and
