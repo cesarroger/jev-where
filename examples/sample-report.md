@@ -1,233 +1,220 @@
 # Example: `/jev-where` on the helpdesk fixture
 
-A real run of the skill on [`evals/helpdesk-report/app`](../evals/helpdesk-report/app), a fake support-ticket
-service built to test the plugin, with live precedent lookup on 2026-10-11. Every
-cited precedent was checked against the awesome-jev category files fetched that
-day. Figures quoted from list entries are the entries' own claims, unverified.
-For the same app with no network, see [sample-report-offline.md](sample-report-offline.md).
+A real run of JEV WHERE? v0.3 on [`evals/helpdesk-report/app`](../evals/helpdesk-report/app), a fake
+support-ticket service built to test the plugin, with live precedent lookup on 2026-10-12. Every
+cited precedent was checked against the awesome-jev category files downloaded in that run. Figures
+quoted from list entries are the entries' own claims, unverified. The fixture has a single commit,
+so Jev's Radar found no hot Footprints here.
 
 ---
 
-I analyzed the helpdesk app in the current project: `README.md` and all 8 files in `helpdesk/` (113 lines). I did not open `.env`. The app doesn't use Jev today. The precedent lookup ran on 2026-10-11 and fetched four awesome-jev categories: Classification & Routing, Verification & Guardrails, Content Moderation, and Scoring & Ranking.
-
-Listings on awesome-jev are not endorsements.
+Scope: I analyzed the current project (one Python helpdesk app: 8 code files under `helpdesk/` plus `README.md`). I skipped `.env` because it's a secret file and wasn't opened. I read `helpdesk/settings.py` for setting names only. The app does not call Jev today. Jev's Radar ran with Footprints and found no rules that people keep patching. Run date: 2026-10-12. Precedent lookup worked. I fetched these awesome-jev categories: Classification & Routing, Content Moderation, Verification & Guardrails, and Scoring & Ranking. Listings on awesome-jev are not endorsements.
 
 Choice picks one option from a list. Score places something on ordered levels. Noul is the probability that a yes/no statement is true.
 
 | Rank | Idea | Shape | Effort | Value | Risk |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Team routing for new tickets | Choice | S | High | Low |
-| 2 | Ticket priority | Score | S | High | Low |
-| 3 | Angry-customer flag (replaces the YES/NO LLM call) | Noul | S | Medium | Low |
-| 4 | Abuse hold | Noul ×2 | M | High | Medium |
-| 5 | Auto-close on a customer reply | Noul ×2 | M | Medium | Medium |
-| 6 | Auto-refund approval | Noul ×2, policy in code | M | Medium | High |
-| 7 | Help-article suggestions | Noul per article | M | Low | Low |
+| 1 | Route new tickets to a team | Choice | S | High | Low |
+| 2 | Score ticket urgency | Score | S | High | Low |
+| 3 | Swap the "is angry" LLM call for a Noul | Noul | S | Medium | Low |
+| 4 | Decide which tickets to hold for abuse | Noul ×2 | M | Medium | Medium |
+| 5 | Gate auto-refunds on what the customer actually asks | Noul ×2 | M | High per case | High |
+| 6 | Rank help-article suggestions | Noul per candidate | S | Low | Low |
+| 7 | Close tickets on "resolved" replies | Noul | S | Low | Medium |
 
-### 1. Team routing for new tickets
-- **Where:** `helpdesk/router.py:14` (`route`), with the regexes at `helpdesk/router.py:4-9`. It is called from `helpdesk/pipeline.py:12`.
-- **Today:** Four regexes run over the subject and body. The first match wins, in a fixed order: billing, technical, account, sales. Anything else goes to `general`. On mixed tickets the order decides:
-  - "refund for the API error" goes to billing.
-  - "can't log in to update my card" goes to billing.
-  - "a quote for 500 seats" goes to technical, because the technical regex matches `500`.
-
-  This runs on every open ticket. The README says "Roughly 4,000 tickets a day" (`README.md:6`). A misroute costs a transfer and a delay, and it can be undone.
+### 1. Route new tickets to a team
+- **Where:** `helpdesk/router.py:14` (`route`), with its regexes at `helpdesk/router.py:5-8`.
+- **Today:** The first regex that matches subject plus body wins. They are checked in a fixed order: billing, technical, account, sales, and "general" if none match. A ticket that mentions both an invoice and an error always goes to billing. Words like "card" match even when they aren't about payment.
 - **Jev decision:** Choice: "Which team should handle the request in this ticket?"
   - `billing`: charges, invoices, refunds, payment methods
-  - `technical`: errors, bugs, crashes, API or integration problems, something not working
-  - `account`: login, password, 2FA, locked accounts, username or profile changes
-  - `sales`: pricing, quotes, upgrades, enterprise plans, discounts
-  - `general` (no match): none of the above, or not enough information to tell
+  - `technical`: errors, bugs, crashes, API or integration problems
+  - `account`: login, password, 2FA, locked accounts, username changes
+  - `sales`: pricing, quotes, upgrades, plans, discounts
+  - `general`: none of these, or unclear
   - State: `ticket.subject`, `ticket.body`
 - **Confidence handling (starting point; tune on labeled data):**
-  - Confidence ≥ 0.8: route to the chosen queue.
-  - 0.5 to 0.8: route there and tag the ticket for a quick routing check.
-  - Below 0.5, or on an error or timeout: use today's `route()` regex result.
-
-  Every outcome can be undone, so no human gate is needed.
+  - Confidence ≥ 0.8: route.
+  - 0.5 to 0.8: route, and flag for a quick check.
+  - Below 0.5, or on any Jev error: fall back to the current `route()` regex.
+- **What Jev Sees:** personal (customer messages). Send only the subject and body. Strip signatures, email addresses and phone numbers. Don't send the order record or customer IDs.
 - **Precedent:**
-  - [jev-cookbook](https://github.com/nexibeo/jev-cookbook) (Classification & Routing): runnable recipes that route support tickets with Choice and Noul questions and send low-confidence answers to human review. It is the same job with the same fallback idea.
-  - [Jev email intent workflow](https://github.com/GiesN/typesafe-jev-workflow) (Classification & Routing): a Choice routes each inbound email to a handler, like this app's email-to-ticket entry point. It has only two options (`invoice`, `general`).
-- **Benefit:** Mixed-topic tickets go to the team that owns the actual problem instead of the first keyword. Wording outside the regexes ("I was billed two times", "the dashboard won't load") stops landing in `general`.
-- **Main risk:** Team boundaries that people find fuzzy, such as "refund because the feature is broken", will also be fuzzy for Jev. Expect those in the middle band.
-- **Poor fit if:** the inbound address or a form field already names the team (use that field), or transfers between queues are already rare.
+  - [jev-cookbook](https://github.com/nexibeo/jev-cookbook) (Classification & Routing): runnable recipes that route support tickets with Choice and Noul questions and send low-confidence answers to human review. This is the same task.
+  - [Jev email intent workflow](https://github.com/GiesN/typesafe-jev-workflow) (Classification & Routing): a typed Choice sends each inbound email to the matching handler. Same dispatch shape, with fewer options.
+- **Benefit:** The team is chosen from what the ticket means, not from the first keyword in a fixed order.
+- **Main risk:** The option definitions must match how the teams really split work. Otherwise ambiguous tickets still land in the wrong place.
+- **Poor fit if:** tickets start arriving with a structured category field (use the field instead), or volume drops to a handful a day.
+- **Why this rank:** Almost every ticket goes through it (about 4,000 a day per the README, minus held and refunded ones). Today it is a first-match regex that ignores context. Misroutes are cheap and reversible: a reassignment and some delay.
 - **Effort:** S
 
-### 2. Ticket priority
-- **Where:** `helpdesk/router.py:22` (`priority`), with the word list at `helpdesk/router.py:11`. It is called from `helpdesk/pipeline.py:13`.
-- **Today:** It counts words from `URGENT_WORDS` in the body only and ignores the subject:
-  - 2 or more hits, or "!!!", gives priority 2.
-  - 1 hit gives 1.
-  - Otherwise 0.
-
-  This is plain substring matching, so "down" fires on "download" and "dropdown". An outage worded as "nobody on our team can sign in" scores 0. It runs on every open ticket. A wrong priority delays urgent tickets or pushes routine ones ahead, and it can be undone.
-- **Jev decision:** Score: "How urgent is the issue in this ticket for the customer?"
-  - `0` (low): a question, feedback, or request where nothing is broken and there's no deadline. This level also covers tickets that describe no problem at all.
-  - `1` (normal): something isn't working for this customer, but they have a workaround or no time pressure.
-  - `2` (high): the customer can't work or can't take payments, a service is down for many of their users, or they name a deadline of today.
+### 2. Score ticket urgency
+- **Where:** `helpdesk/router.py:22` (`priority`), using `URGENT_WORDS` at `helpdesk/router.py:11`.
+- **Today:** Counts urgent words as substrings. Two or more hits, or "!!!", gives 2. One hit gives 1. Otherwise 0. "down" matches "download", and a calm description of a real outage can score 0.
+- **Jev decision:** Score: "How urgent is the issue described in this ticket?"
+  - `0`: a routine question or request with no deadline, and work isn't blocked. This also covers "nothing applies".
+  - `1`: inconvenient, or blocks one person, but there is a workaround or it can wait.
+  - `2`: blocks the customer's work or many users: an outage, data loss, or revenue stopped.
+  - These keep today's 0 to 2 scale, so the queue code doesn't change.
   - State: `ticket.subject`, `ticket.body`
 - **Confidence handling (starting point; tune on labeled data):**
-  - Round the position to the nearest level first.
-  - Confidence ≥ 0.8: use that level.
-  - 0.5 to 0.8: use it and flag the ticket for a quick check.
-  - Below 0.5, or on an error or timeout: use today's `priority()`.
-
-  Keep the unrounded position as a sort key within each level, so the most urgent "normal" tickets come first.
+  - Round the position to the nearest level, and keep the unrounded position for sorting within a level.
+  - Confidence ≥ 0.8: use the level.
+  - 0.5 to 0.8: use it, and flag for a quick check.
+  - Below 0.5, or on any error: fall back to the current `priority()` word count.
+- **What Jev Sees:** personal. Same fields as idea 1, sent in the same request.
 - **Precedent:**
-  - [jev-oncall](https://github.com/mingleiw/jev-oncall) (Classification & Routing): asks a severity Score and an owning-team Choice in one call per alert and sends a middle band to a person. It falls back to configured severity on any error or timeout, the way this would fall back to `priority()`. The entry reports latency and cost from a 300-alert run; those are its own figures, unverified.
-  - [Jev-Mail](https://github.com/vynnlee/jev-mail) (Classification & Routing): scores the urgency of incoming email and sends uncertain mail to review.
-- **Benefit:** Priority follows impact instead of word counts and exclamation marks. The subject line counts, and you get an order within each level.
-- **Main risk:** A real outage scored 0 or 1 waits in the queue. During the trial, you could stop Jev from lowering a ticket below the keyword result. That departs from the default bands, and the reason is that a missed outage costs more than an over-prioritized question.
-- **Poor fit if:** priority really comes from plan tier or SLA terms that code can look up. In that case use the lookup, and keep Jev only for how urgent the issue itself is.
+  - [Jev-Mail](https://github.com/vynnlee/jev-mail) (Classification & Routing): Jev scores urgency, importance and category for incoming mail and sends uncertain mail to review.
+  - [JevBystander](https://github.com/Nisaka520/JevBystander) (Classification & Routing): a 0 to 3 urgency Score asked in one batched request alongside intent questions.
+- **Benefit:** Urgency is judged on the situation, not on punctuation or substrings.
+- **Main risk:** The levels can drift from what the support team means by "urgent". Write them with the support leads.
+- **Poor fit if:** priority should come from contract or SLA tiers. Look the tier up in code, and use Jev only for the urgency described in the text.
+- **Why this rank:** It runs on the same roughly 4,000 tickets a day. The substring count both over-fires and under-fires. Mistakes cost a middling amount (a missed SLA or an inflated queue) but can be reversed.
 - **Effort:** S
 
-### 3. Angry-customer flag (replaces the YES/NO LLM call)
-- **Where:** `helpdesk/sentiment.py:7` (`is_angry`). It is called from `helpdesk/pipeline.py:14`.
-- **Today:** Each open ticket gets one `gpt-4o-mini` chat call with "Answer only YES or NO." and "Is this customer angry?". The reply is parsed with `startswith("YES")`, and a yes sends the ticket to a senior agent. The call has no timeout or error handling. A wrong answer either spends senior time on a calm ticket or leaves an angry customer with a junior agent. It can be undone.
-- **Jev decision:** Noul: "The customer who wrote this ticket is angry or strongly frustrated with the company or its service."
-  - Counts as yes: clear anger or frustration aimed at the company, product, or staff, such as complaints about repeated failures, threats to leave, or insults.
-  - Doesn't count: urgency alone, a polite report of a problem, or sadness.
+### 3. Swap the "is angry" LLM call for a Noul
+- **Where:** `helpdesk/sentiment.py:7` (`is_angry`), with the LLM call at `helpdesk/sentiment.py:8`.
+- **Today:** Asks gpt-4o-mini a YES/NO question and treats any answer starting with "YES" as angry. An angry ticket goes to a senior agent. The call has no timeout or error handling.
+- **Jev decision:** Noul: "The customer who wrote this ticket is angry or frustrated with the company, its product, or its staff."
+  - Yes means clear anger or frustration aimed at the company: repeated failures, complaints, or threats to leave.
+  - A neutral tone, or annoyance at their own mistake, counts as no.
   - State: `ticket.body`
 - **Confidence handling (starting point; tune on labeled data):**
-  - p ≥ 0.8: senior agent.
+  - p ≥ 0.8: send to a senior agent.
   - p ≤ 0.2: normal queue.
-  - Between, or if Jev errors: use today's gpt-4o-mini call.
-
-  Wrap today's call in a timeout and try/except. A failure should then give `senior = False` and still create the ticket, instead of failing all of `handle_new_ticket`.
-- **Precedent:** [Vibefilter](https://github.com/vibefilter/filament) (Classification & Routing): asks a Noul on "The customer is angry." for each row and keeps rows at or above 0.8, which is almost the same statement and cutoff. The entry reports matching its demo's mood labels on 861 of 1,000 reviews. That is the entry's own figure on demo data, unverified.
-- **Benefit:** You get a probability with a tunable cutoff instead of parsing free text. The LLM is only called for the uncertain middle. This question can go in the same request as ideas 1 and 2.
-- **Main risk:** Sarcasm and polite-but-furious messages. The cutoff can also drift from what senior agents actually want to pick up.
-- **Poor fit if:** the current call is already accurate and cheap enough and you won't batch it with the other ticket questions. Then the main gain is robustness, which a try/except alone also gives.
+  - In between, or on a Jev error: use the current LLM call. Wrap that call in a timeout and try/except so a failure returns "not angry" (the normal queue) instead of crashing the ticket.
+- **What Jev Sees:** personal. Send the body only, with the signature stripped. The same body already goes to OpenAI today, so switching moves it to TypeSafe instead. Check your data policy.
+- **Precedent:**
+  - [Vibefilter](https://github.com/vibefilter/filament) (Classification & Routing): a Noul per row on "The customer is angry.", keeping rows at or above 0.8. Its listing reports matching the demo's own mood labels on 861 of 1,000 reviews (from the listing, unverified).
+  - [Notra](https://github.com/usenotra/notra) (Classification & Routing): a production platform that moved classifiers off an LLM and onto Jev yes/no decisions behind a flag. It is a similar swap.
+- **Benefit:** You get a probability you can put a threshold on, instead of parsing free text. It can ride in the same request as ideas 1 and 2, which would let you drop the separate LLM call. Measure cost and latency yourself.
+- **Main risk:** "Angry" is subjective. The cutoff decides how many tickets reach senior agents.
+- **Poor fit if:** the senior-agent rule needs a written reason for each ticket. Jev returns probabilities, not explanations.
+- **Why this rank:** It runs on the same roughly 4,000 tickets a day. Today it is a label-only LLM call, parsed by prefix and unguarded. Mistakes are cheap: some senior time, or a junior agent with an upset customer. It ranks below 1 and 2 because an LLM is probably less weak than those regex rules.
 - **Effort:** S
 
-### 4. Abuse hold
-- **Where:** `helpdesk/abuse.py:7` (`should_hold`), with the regex at `helpdesk/abuse.py:4`. It runs first, in `helpdesk/pipeline.py:6`.
-- **Today:** A regex matches "idiot", "stupid", "moron", "scam" or "scammers", and starred spellings of one swear word. Any match returns `held_for_review` and stops the pipeline: no queue, no priority, no refund check. It runs on every new ticket (about 4,000 a day).
-  - False positives hold real customers, sometimes fraud victims: "I think this email was a scam", "sorry if this is a stupid question".
-  - False negatives let insults or threats in other words or spellings through to agents.
-
-  A hold can be undone, but the code doesn't show how held tickets get reviewed.
-- **Jev decision:** Noul, one per policy category:
-  - "This ticket insults, swears at, or harasses support staff or the company's employees."
-    - Counts as yes: abuse aimed at people, including disguised spellings.
-    - Doesn't count: calling a charge or an email a scam, or criticizing the product.
-  - "This ticket threatens violence or other harm against a person."
-    - Counts as yes: any threat of harm, including a conditional one.
+### 4. Decide which tickets to hold for abuse
+- **Where:** `helpdesk/abuse.py:7` (`should_hold`), with the regex at `helpdesk/abuse.py:4`.
+- **Today:** A five-word regex (insults, "scam", a masked swear word) holds the ticket for review, and nothing else in the pipeline runs. A customer reporting a scam gets held. Abuse without those words gets through.
+- **Jev decision:** Noul ×2
+  - Noul: "This ticket insults, demeans, or uses slurs against support staff or company employees." Yes means abuse aimed at people. Swearing at a product or situation ("this stupid app") counts as no.
+  - Noul: "This ticket threatens violence or harm to a person." Yes means any such threat.
   - State: `ticket.body`
 - **Confidence handling (starting point; tune on labeled data):**
-  - Hold if either Noul is p ≥ 0.8.
-  - Don't hold if both are ≤ 0.2, even when the regex matches. This is what frees the "scam" reports.
-  - Anything else, or an error: use today's regex.
-
-  These are the defaults for an action that can be undone, because a hold can be released. If a hold ever triggers a ban, a block, or a message to the customer, switch to the costly cutoffs and have a person decide.
+  - Any one triggers: hold if either Noul has p ≥ 0.8.
+  - Pass if both are ≤ 0.2.
+  - Otherwise, or on any error, the current regex decides.
+  - A hold already goes to a person, so the default reversible cutoffs fit.
+- **What Jev Sees:** personal. Send the body only.
 - **Precedent:**
-  - [profanity-checker](https://github.com/4rays/profanity-checker) (Content Moderation): one Noul for literal profanity and a second for disguised spellings, with the threshold and policy in code. That is the same split as the regex's handling of starred spellings.
-  - [mastra-jev-moderation](https://github.com/CodeAlive-AI/mastra-jev-moderation) (Content Moderation): one block question plus a category Choice in one request, cut at 0.7, failing open behind a deadline. The entry reports that in production it blocked 9/9 hostile and 0/49 real messages. Those are its own figures, unverified.
-- **Benefit:** Fewer real customers get held, which also means fewer refund checks and routings skipped. Abuse worded outside the list gets caught.
-- **Main risk:** The abuse policy is vague today, and Jev will apply whatever the statements say. The wording needs agreement from whoever reviews holds.
-- **Poor fit if:** holds are rare and reviewed within minutes, so a false positive costs little.
+  - [profanity-checker](https://github.com/4rays/profanity-checker) (Content Moderation): one Noul for literal profanity and a second for disguised spellings. The threshold and the `max()` "any one triggers" policy live in code.
+  - [mastra-jev-moderation](https://github.com/CodeAlive-AI/mastra-jev-moderation) (Content Moderation): a yes/no block question plus a category Choice in one request, failing open behind a deadline. Its listing reports 9/9 hostile and 0/49 real messages blocked in production (from the listing, unverified).
+- **Benefit:** Customers who report scams or vent about a product stop getting held, and abuse that avoids the five words is caught.
+- **Main risk:** An abusive ticket that slips through reaches an agent. The abuse policy must be written down and agreed.
+- **Poor fit if:** holds are rare and reviewers clear them in minutes. Then the regex's false holds cost little.
+- **Why this rank:** Every ticket goes through it (about 4,000 a day), and it gates the whole pipeline. Today it is a tiny word list that both over-holds and misses. Mistakes cost a middling amount: a real customer waits, or an agent sees abuse. It needs an agreed policy, so it is M.
 - **Effort:** M
 
-### 5. Auto-close on a customer reply
-- **Where:** `helpdesk/autoclose.py:7` (`should_close`), with the regex at `helpdesk/autoclose.py:4`. It is called from `helpdesk/pipeline.py:20` (`handle_reply`).
-- **Today:** It closes the ticket when the latest reply is only "thanks", "thank you", "thx", "ty", or "cheers". The thread isn't used, even though `handle_reply` receives `ticket`. So it misses "Thanks, that fixed it!", and it closes on a "thanks" sent after "we're still looking into it". Reply volume is not visible. A wrong close reaches the customer, so this counts as costly.
-- **Jev decision:** Noul, two statements:
-  - "In the latest reply, the customer says their issue is resolved or that they need nothing more."
-    - Counts as yes: an explicit confirmation, or a thank-you that ends the conversation after a fix.
-  - "In the latest reply, the customer asks something new or says the problem is still happening."
-    - Counts as yes: any open question or remaining problem.
-  - State: `latest_reply`, the agent's previous message, `ticket.subject`
+### 5. Gate auto-refunds on what the customer actually asks
+- **Where:** `helpdesk/refunds.py:6` (`auto_refund`), with substring checks at `helpdesk/refunds.py:8-9`.
+- **Today:** It refunds automatically when the body contains ("refund" or "money back") and ("charged twice" or "double charge"), and the order is $50 or less. No agent ever sees the ticket. The substrings ignore negation and context: "non-refundable" contains "refund".
+- **Jev decision:** Noul ×2
+  - Noul: "In this ticket, the customer asks for their money back." Yes means an explicit request for a refund or reversal. Questions about refund policy, or "I don't want a refund", count as no.
+  - Noul: "In this ticket, the customer says they were charged more than once for the same purchase." Yes means a duplicate-charge claim. Disputing a single charge counts as no.
+  - State: `ticket.body` only. The order amount stays in code.
 - **Confidence handling (starting point; tune on labeled data):**
-  - Close only when the first Noul is ≥ 0.9 and the second is ≤ 0.1. The 0.1 mirrors the 0.9 bar, because a wrong close reaches the customer.
-  - Where your data allows, also require a code check, for example that an agent replied after the customer's last question.
-  - Everything else stays open for an agent to close, which is today's manual flow.
-  - Errors and timeouts: leave the ticket open.
-
-  This is stricter than today for a bare "thanks" Jev is unsure about. Leaving those open is the safe direction.
+  - Moving money is costly, so all must pass. Refund only when both Nouls have p ≥ 0.9, `order.amount_usd` is $50 or less, and, where the payment records allow it, code confirms a second charge on that order.
+  - Everything else goes through normal routing to billing, which is the manual flow.
+  - Jev errors or timeouts also go to the manual flow. Never refund on an error (fail closed).
+  - Don't fall back to the substring rule; that is the weak part.
+- **What Jev Sees:** personal, and sensitive if customers paste card details. Send the body only, with digit runs and card numbers masked. Never send the order record or the amount.
 - **Precedent:**
-  - [jev-cookbook](https://github.com/nexibeo/jev-cookbook) (Classification & Routing): support-ticket recipes with Noul questions, sending low-confidence answers to human review.
-  - [TryJevAI](https://tryjevai.com/) (Verification & Guardrails): a public playground that uses an explicit `Unresolved` option to tell a mentioned time from an agreed one before treating it as settled. It has the same "act only when it's clearly settled" shape in another domain. It is a playground, not production use.
-- **Benefit:** More truly resolved tickets close automatically, and fewer close on a polite "thanks" while the problem is still open.
-- **Main risk:** Closing a ticket the customer still needs. The code doesn't show whether closing also sends the customer an email.
-- **Poor fit if:** reply volume is small, or reopen rates are already low.
+  - [local-decider](https://github.com/pusucip25/local-decider) (Verification & Guardrails): a rule chain runs first, and Jev is asked only where no rule decides. Its listing reports 0 false allows on irreversible tools in 112 labelled cases (from the listing, unverified). It gates agent actions, not refunds, but it has the same shape: rules first, Jev for the fuzzy part, fail closed.
+  - [pi-verdict](https://github.com/jesset/pi-verdict) (Verification & Guardrails): an allow/ask/deny gate where errors and timeouts deny. Its listing calls it experimental.
+- **Benefit:** No more refunds triggered by "non-refundable" or by a customer who isn't asking for money back. The $50 cap stays exact, in code.
+- **Main risk:** A wrong yes sends money out, and the ticket never reaches a person.
+- **Poor fit if:** the payment system can detect duplicate charges itself. Check the records in code and keep only the "asks for money back" Noul. Also a poor fit if refund volume is tiny: send them all to billing.
+- **Why this rank:** Volume isn't visible (only tickets with an order). The substring rule ignores negation. Mistakes are costly and irreversible: up to $50 each, with no human review. The value per case is high, but it needs a policy agreed and carries the most risk, so it comes after the reversible ideas.
 - **Effort:** M
 
-### 6. Auto-refund approval
-- **Where:** `helpdesk/refunds.py:6` (`auto_refund`), with the limit at `helpdesk/refunds.py:3`. It is called from `helpdesk/pipeline.py:8`.
-- **Today:** It approves when all three hold:
-  - the lower-cased body contains "refund" or "money back";
-  - it also contains "charged twice" or "double charge";
-  - `order["amount_usd"] <= 50`.
-
-  Substring matching ignores negation ("I was not charged twice") and other wording ("billed two times"). Nothing here checks that a duplicate charge actually exists, or that the order wasn't already refunded. The code that moves the money isn't in this folder. It runs on new tickets that have an order and weren't held; that volume is not visible. A wrong approval sends out up to $50 and is hard to undo.
-- **Jev decision:** Noul, one per condition. The refund policy stays in code.
-  - "This ticket asks for money back."
-    - Counts as yes: an explicit request for a refund, reversal, or credit.
-  - "This ticket says the customer was charged more than once for the same purchase."
-    - Counts as yes: the customer states a duplicate charge.
-    - Doesn't count: a denial, or a question about whether it happened.
-  - State: `ticket.body`. `order.amount_usd` stays in code.
-- **Confidence handling (starting point; tune on labeled data):** Auto-refund only when all of these hold:
-  - both Nouls are ≥ 0.9;
-  - the amount is ≤ $50 (checked in code);
-  - where you have payment records, they show two charges for this order and no earlier refund.
-
-  Everything else gets no auto-refund, and the ticket continues to normal routing so a person in billing handles it. Errors and timeouts also mean no auto-refund (fail closed).
-- **Precedent:**
-  - [jev-risk-check-provider](https://github.com/caiovicentino/jev-risk-check-provider) (Verification & Guardrails): in agent payments, Jev answers typed Noul/Choice/Score questions and code controls the final score. That is the same split as here: Jev judges, code decides. Its scale-run and red-team figures are the entry's own, unverified.
-  - [pi-verdict](https://github.com/jesset/pi-verdict) (Verification & Guardrails): deterministic rules settle clear cases first, uncertain cases go to a person, and errors or timeouts deny. That is the fail-closed shape this gate needs. The entry calls itself experimental.
-- **Benefit:** Negated or hypothetical mentions stop triggering refunds, and real duplicate-charge requests in other words can qualify.
-- **Main risk:** Jev recognizes more wordings, so more money may move automatically. Without the payment-record check, the customer's claim alone decides. Keep the code checks.
-- **Poor fit if:** you'd rather a person approve every refund, or refund tickets are few.
-- **Effort:** M (L if you need to add the payment-record check)
-
-### 7. Help-article suggestions
-- **Where:** `helpdesk/kb.py:4` (`suggest_articles`). It is called from `helpdesk/pipeline.py:15`.
-- **Today:** It ranks every article by how many words its title shares with the body. Punctuation isn't stripped and stopwords count. It always returns the top 3, even when none fits. Agents are the only ones who see the suggestions. It runs on every open ticket. A wrong suggestion costs an agent a glance.
-- **Jev decision:** Noul per candidate. First, code builds a shortlist, for example today's overlap score or BM25, top 20.
-  - Per shortlisted article: "This article would help an agent resolve the issue in this ticket."
-    - Counts as yes: the article covers the customer's actual problem, not just shared words.
-  - One more Noul: "At least one of these articles addresses the issue in this ticket." This lets you show nothing.
-  - State: `ticket.body`, plus each candidate's `title` (and a summary, if you have one)
+### 6. Rank help-article suggestions
+- **Where:** `helpdesk/kb.py:4` (`suggest_articles`), sorting at `helpdesk/kb.py:10`.
+- **Today:** Sorts all articles by how many words the body shares with each title and returns the top 3.
+- **Jev decision:** one Noul per candidate: "The help article titled `title` would help answer the request in this ticket."
+  - Yes means the article covers the customer's actual problem.
+  - Code keeps the word-overlap pass as a shortlist of about 10 articles, then asks one Noul per shortlisted article.
+  - State: `ticket.body`, `article.title` for each candidate.
 - **Confidence handling (starting point; tune on labeled data):**
-  - If the "at least one" Noul is ≤ 0.2, show no suggestions.
-  - Otherwise show up to 3: first the articles at p ≥ 0.8, sorted by p, then the in-between ones in today's overlap order. Never show articles at ≤ 0.2.
-  - Errors: use today's ranking.
+  - Show candidates with p ≥ 0.8, sorted by p.
+  - Drop candidates with p ≤ 0.2.
+  - Fill any remaining slots from the current overlap order.
+  - On error, use the current overlap order.
+- **What Jev Sees:** personal (the body) plus internal or public article titles. Send the body and the candidate titles only.
 - **Precedent:**
-  - [jevsearch](https://github.com/kylemclaren/jevsearch) (Scoring & Ranking): takes keyword hits first, sends the top 20 to Jev with a Noul per page and a Noul on whether any page answers, then reorders or drops hits in code. Its own benchmark on the 109-page TypeSafe docs reports Hit@1 of 83% against 41% for keywords alone. That is the entry's figure, unverified.
-  - [Jev RAG](https://github.com/aifabrice/jev-rag) (Scoring & Ranking): a BM25 shortlist followed by batched Noul relevance questions, with a runnable demo and a public benchmark.
-- **Benefit:** Suggestions match the problem rather than shared words, and agents see nothing instead of three irrelevant articles.
-- **Main risk:** Spending Jev calls on suggestions agents may ignore anyway.
-- **Poor fit if:**
-  - This is retrieval reranking. A report on the awesome-jev list found Jev reranking alone did not beat vector search. That is unverified, and it wasn't in the categories fetched this run, so it isn't linked. Compare against vector search or BM25 before committing.
-  - Titles are the only state you have.
-  - The article catalog is too large to shortlist well.
-- **Effort:** M
+  - [jevsearch](https://github.com/kylemclaren/jevsearch) (Scoring & Ranking): sends keyword hits to Jev as one Noul per page and re-orders them in code. Its own benchmark reports Hit@1 of 83% against 41% for keywords alone (from the listing, unverified).
+  - [Jev RAG](https://github.com/aifabrice/jev-rag) (Scoring & Ranking): a keyword-ranking (BM25) shortlist followed by a batched Noul relevance question per passage, with a runnable demo and a public benchmark.
+- **Benefit:** Suggestions follow what the ticket means rather than shared title words.
+- **Main risk:** Little gain on a low-stakes feature, and one more question per candidate on every ticket.
+- **Poor fit if:** agents rarely use suggestions, the knowledge base is too large to judge per article, or a vector search already does well. This is retrieval reranking. A report on the awesome-jev list found that Jev reranking alone did not beat vector search. That is unverified, and it wasn't in the categories fetched this run, so it isn't linked here. Measure against the current suggestions and an embedding search before committing.
+- **Why this rank:** It runs on the same roughly 4,000 tickets a day, and title-word overlap is weak. But mistakes are nearly free (an agent ignores a poor suggestion), and reranking is a known weak spot.
+- **Effort:** S
+
+### 7. Close tickets on "resolved" replies
+- **Where:** `helpdesk/autoclose.py:7` (`should_close`).
+- **Today:** Closes only when the whole reply is a bare thanks (`THANKS_ONLY`, an anchored regex). "Thanks, that fixed it!" stays open.
+- **Jev decision:** Noul: "In this reply, the customer says the issue is resolved and asks for nothing more."
+  - Yes means a confirmation that it works, with no new question or complaint.
+  - State: the reply text.
+- **Confidence handling (starting point; tune on labeled data):**
+  - Keep the regex as the first pass, and ask Jev only about replies it doesn't match.
+  - Closing a customer's ticket is costly, so close only at p ≥ 0.9, and only if code finds no question mark in the reply.
+  - Otherwise, or on error, leave the ticket open, which is today's behaviour.
+- **What Jev Sees:** personal. Send the reply text only, without quoted earlier messages or signatures.
+- **Precedent:** none found in the categories fetched.
+- **Benefit:** Fewer tickets for agents to close by hand.
+- **Main risk:** Closing a ticket where the customer raised a new problem after saying thanks.
+- **Poor fit if:** reply volume is small, or agents close these quickly anyway. Then keep the regex alone.
+- **Why this rank:** Reply volume isn't visible, and today's rule is narrow but precise. A wrong close reaches the customer. The win is small and the risk is real.
+- **Effort:** S
+
+## Power Jewels
+New things Jev could add, using data the app already has.
+- **Churn-risk flag:**
+  - **Data:** ticket bodies in `handle_new_ticket` (`helpdesk/pipeline.py:5`) and customer replies in `handle_reply` (`helpdesk/pipeline.py:19`).
+  - **Question:** Noul: "In this message, the customer says they plan to cancel, not renew, or switch to another provider." Yes means an explicit intent to leave. General frustration counts as no.
+  - **What the app does:** at p ≥ 0.8, tag the ticket and notify the account owner. Otherwise do nothing.
+  - **What Jev Sees:** personal. Send the message text only.
+  - **Precedent:** same Noul-on-a-customer-statement pattern as Vibefilter (see idea 3).
+- **"Still broken" reply flag:**
+  - **Data:** the reply in `handle_reply` (`helpdesk/pipeline.py:19`). Today it is only checked for a bare thanks, and the `ticket` passed alongside it isn't used.
+  - **Question:** Noul: "In this reply, the customer says the problem is still happening or the suggested fix did not work."
+  - **What the app does:** at p ≥ 0.8, flag the ticket back to its agent, or bump it one priority level, instead of leaving it waiting.
+  - **What Jev Sees:** personal. Send the reply text only, without quoted history.
+  - **Precedent:** none found in the categories fetched.
 
 ## One request, several questions
-- **Each new ticket:** ideas 1, 2, 3, 4 and 6 can go in one Jev request (idea 6 only when the ticket has an order). Each answer is independent, so code can use or ignore each one. Code still applies them in the pipeline's order: hold, then refund, then routing. Idea 7's per-article questions can join the request if the shortlist is part of the state.
-- **Each customer reply:** idea 5's two questions can go in one Jev request. Each answer is independent, so code can use or ignore each one.
+- **Each new ticket (`handle_new_ticket`, `helpdesk/pipeline.py:5`):** ideas 1 to 5 all read `ticket.body` (idea 1 adds the subject). Idea 6 can join once code has the article shortlist. They can go in one Jev request. Each answer is independent, so code can use or ignore each one.
+  - The pipeline stops early: a hold (idea 4) skips everything after it, and an auto-refund (idea 5) skips routing.
+  - One request per ticket is the better choice here. It is simplest and needs one round trip. Only the answers for held or refunded tickets go unused, which is probably a small share.
+  - Code applies the hold, then the refund gate, then everything else.
+  - Switch to two stages (the gate questions first, the rest only for tickets that continue) if held or refunded tickets turn out to be a large share.
+- **Each customer reply (`handle_reply`, `helpdesk/pipeline.py:19`):** idea 7 and both Power Jewels read the reply text and can share one request.
+
+## Not Jev's Job
+- `helpdesk/refunds.py:3` (`AUTO_REFUND_LIMIT_USD`): a money cap set by policy, compared exactly against `order.amount_usd`. What would change my mind: nothing about the cap itself. Even limits that vary by customer history would be a lookup in code.
+- `helpdesk/pipeline.py:8` (`handle_new_ticket`, the "order exists" check): this is a data-presence fact. What would change my mind: refund requests arriving without an attached order. Then code could find candidate orders and Jev could pick one with a Choice over those candidates.
+- `helpdesk/autoclose.py:4` (`THANKS_ONLY`): an anchored, narrow, precise regex. Keep it as the first pass in idea 7. What would change my mind: seeing it close tickets that still needed help.
+
+## Off the Map
+- `.env`: a secret file, not opened. There is nothing to cover; it should hold config, not decisions.
+- **Whatever calls `handle_new_ticket` and `handle_reply`** (web handler, email ingest, or queue): it isn't in this folder, and nothing in the app calls these functions. The volume figure comes only from the README. To cover it next: `/jev-where <path to that service>`
+- `helpdesk/settings.py`: read for setting names only, because it holds a secret. No decision logic was found by name.
 
 ## Also noticed
-- `helpdesk/settings.py:3`: a hardcoded `SIGNING_SECRET` in source. The file's docstring says it is fake. If a real value ever lands here, move it to the environment or a secret manager and rotate it.
-- `helpdesk/sentiment.py:8`: the OpenAI call has no timeout or error handling. An API error or a slow response makes `handle_new_ticket` fail for every ticket that reaches it.
-- `helpdesk/sentiment.py:12`: the ticket body goes straight into the prompt, so a customer can write text that steers the YES/NO answer.
-- `helpdesk/pipeline.py:6`: the abuse hold runs before the refund check and returns early. A ticket like "you scammers charged me twice" is held, and never gets a refund check, a queue, or a priority.
-- `helpdesk/refunds.py:10`: the approval doesn't check that the order really was charged twice, or that it wasn't already refunded.
+- `helpdesk/settings.py:3`: hardcoded secret (`SIGNING_SECRET`, value not shown). Move it to the environment or a secret store, and rotate it.
+- `helpdesk/sentiment.py:8` (`is_angry`): the LLM call has no timeout, try/except or retry. A failure, or an empty answer hitting `.strip()`, fails the whole new-ticket result.
+- `helpdesk/sentiment.py:12`: the raw ticket body is pasted into the prompt, so a customer can steer the YES/NO answer. The full body is also sent to a third party.
+- `helpdesk/pipeline.py:6`, `helpdesk/router.py`, `helpdesk/refunds.py`: direct `ticket["subject"]`, `ticket["body"]` and `order["amount_usd"]` lookups raise KeyError when a field is missing.
 
 ## Start here
-Start with idea 1, team routing:
-- It runs on every ticket (about 4,000 a day).
-- A misroute is cheap to undo.
-- The existing regex is a ready fallback.
-- Your ticket history already gives you labels: the queue each ticket ended up in after transfers.
+Start with idea 1, routing. It touches almost every ticket, today's rule is the weakest kind (first-match regex), mistakes are cheap and reversible, and it is a single call site with an existing fallback. Run it in shadow mode next to `route()` first. Once it holds up, add ideas 2 and 3 to the same request. Evaluate it on a small labeled set of real inputs: run the current approach and Jev side by side, then compare accuracy, accuracy on the cases Jev would handle automatically, how often it falls back, and the cost and latency you measure yourself.
 
-Once it holds up, add ideas 2 and 3 to the same request.
-
-Evaluate it on a small labeled set of real inputs. Run the current approach and Jev side by side, then compare:
-- accuracy;
-- accuracy on the cases Jev would handle automatically;
-- how often it falls back;
-- the cost and latency you measure yourself.
-
-Want me to draft a minimal starter integration for one of these ideas? Tell me which one. I'll read the current TypeSafe docs first (and tell you if I can't reach them), and show the code here without changing any files.
+Want me to draft a minimal starter integration for one of these ideas? Tell me which one. I'll read the current TypeSafe docs first (and tell you if I can't reach them), and show the code here without changing any files. I can also save this report as a Treasure Map (`jev-where-map.json`) so the next run can show what changed.

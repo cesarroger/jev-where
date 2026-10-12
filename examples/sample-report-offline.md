@@ -1,6 +1,6 @@
 # Example: `/jev-where` on the helpdesk fixture, with no network
 
-A real run of the skill on [`evals/helpdesk-offline/app`](../evals/helpdesk-offline/app), with every network
+Made with v0.2, before Jev's Radar and the v0.3 report sections. A real run of the skill on [`evals/helpdesk-offline/app`](../evals/helpdesk-offline/app), with every network
 tool blocked, lightly edited to match the skill's current wording rules. It shows what happens when the precedent lookup can't run: the
 report says so once and labels every idea, and nothing is filled in from
 memory. The fixture's fake secrets are flagged by location only.
