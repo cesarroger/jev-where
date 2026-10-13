@@ -9,7 +9,7 @@ import textwrap
 import unittest
 
 RADAR = pathlib.Path(__file__).resolve().parent.parent / "skills" / "jev-where" / "scripts" / "jev_radar.py"
-FAKE_KEY = "sk-live-0123456789abcdefghijklmnop"
+FAKE_KEY = "fixture-not-a-real-key-0123456789"
 FAKE_ENV = "env-secret-ZZZ-should-never-print"
 
 

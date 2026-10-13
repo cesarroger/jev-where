@@ -67,7 +67,7 @@ def card(x, y, color, num, title, sub, angle, style="solid", w=360, h=180):
 card(40, 60, SKY, 1, "Your app", "code, or a short\ndescription", -0.015)
 card(520, 60, SUN, 2, "Jev's Radar sweeps\nthe code", "regex rules · yes/no LLM calls\nrouting · gates · Footprints", 0.012)
 card(1000, 60, MINT, 3, "Write the typed\nquestion", "", -0.01)
-card(1000, 420, LILAC, 4, "Fetch live\nprecedents", "awesome-jev category files,\nfresh on every run", 0.014)
+card(1000, 420, LILAC, 4, "Check Jev Sightings\n+ live list", "real Jev calls, exact lines;\nawesome-jev fetched fresh", 0.014)
 card(520, 420, PINK, 5, "Ranked report", "value · effort · risk\n+ Power Jewels + start here", -0.012)
 card(40, 420, LIME, 6, "Starter code\n+ Treasure Map", "from the current TypeSafe docs,\nplus a map to track progress", 0.01, style="dashed")
 
@@ -88,7 +88,7 @@ text(404, 548, 120, "only if you\nsay yes", size=18, color=TOMATO, angle=-0.04)
 
 # --- side notes ---------------------------------------------------------------
 text(46, 252, 330, "it reads your code.\nit never edits it.", size=20, color=TOMATO, angle=-0.03)
-text(1020, 610, 340, "no network? it says so,\nand cites nothing", size=18, color=SOFT, angle=0.02)
+text(1020, 610, 340, "no network? bundled sightings,\nmarked \"not rechecked\"", size=18, color=SOFT, angle=0.02)
 
 # --- Jev, between the rows ----------------------------------------------------
 J = ["jev"]

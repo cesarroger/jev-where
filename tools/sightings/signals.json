@@ -1,0 +1,127 @@
+{
+  "about": "How the Sightings tools tell that a project calls Jev. Every signal names the official file it comes from, pinned to the commit it was read at (2026-10-12). Maintainer tooling only; the skill never loads this file.",
+  "sources": {
+    "py-sdk": "https://github.com/typesafe-ai/typesafe-sdk-python/blob/e70bf99a89f27102247613bcd5d1aa8923a1cda9/src/typesafe_sdk/constants.py",
+    "py-readme": "https://github.com/typesafe-ai/typesafe-sdk-python/blob/e70bf99a89f27102247613bcd5d1aa8923a1cda9/README.md",
+    "js-sdk": "https://github.com/typesafe-ai/typesafe-sdk-js/blob/66880ccded6cb642dc1809620c2b108c33730214/src/client.ts",
+    "js-readme": "https://github.com/typesafe-ai/typesafe-sdk-js/blob/66880ccded6cb642dc1809620c2b108c33730214/README.md",
+    "adapter": "https://github.com/typesafe-ai/system-one-adapter-python/blob/e1d4cc938204b22fc5a3c3aca7044072fe3f712d/README.md",
+    "n8n": "https://github.com/typesafe-ai/n8n-nodes-typesafe-ai/blob/c12537bbd9ed7159b7bbe23678ca128c7b2fb52b/package.json",
+    "js-questions": "https://github.com/typesafe-ai/typesafe-sdk-js/blob/66880ccded6cb642dc1809620c2b108c33730214/src/questions.ts",
+    "gateways": "Not from TypeSafe: model ids seen in projects that reach Jev through Vercel AI Gateway (typesafe-ai/jev) and Cloudflare Workers AI (typesafe/jev). Medium only."
+  },
+  "signals": [
+    {
+      "id": "call",
+      "level": "strong",
+      "via": "sdk",
+      "source": "py-readme",
+      "pattern": "\\.(?:system_one|systemOne)\\s*\\("
+    },
+    {
+      "id": "endpoint",
+      "level": "strong",
+      "via": "http",
+      "source": "js-sdk",
+      "pattern": "/v1/systemone\\b"
+    },
+    {
+      "id": "py-sdk",
+      "level": "strong",
+      "via": "sdk",
+      "source": "py-readme",
+      "pattern": "\\btypesafe_sdk\\b|\\btypesafe-sdk\\b"
+    },
+    {
+      "id": "js-sdk",
+      "level": "strong",
+      "via": "sdk",
+      "source": "js-readme",
+      "pattern": "@typesafe-ai/sdk\\b"
+    },
+    {
+      "id": "client",
+      "level": "strong",
+      "via": "sdk",
+      "source": "js-sdk",
+      "pattern": "\\b(?:Async)?TypeSafeClient\\b"
+    },
+    {
+      "id": "api-host",
+      "level": "strong",
+      "via": "http",
+      "source": "py-sdk",
+      "pattern": "\\bapi\\.typesafe\\.ai\\b"
+    },
+    {
+      "id": "adapter",
+      "level": "strong",
+      "via": "adapter",
+      "source": "adapter",
+      "pattern": "\\bsystem_one_adapter\\b|\\bsystem-one-adapter\\b|\\bSystemOneAdapterClient\\b"
+    },
+    {
+      "id": "n8n",
+      "level": "strong",
+      "via": "integration",
+      "source": "n8n",
+      "pattern": "\\bn8n-nodes-typesafe-ai\\b"
+    },
+    {
+      "id": "wire-type",
+      "level": "medium",
+      "via": "http",
+      "source": "js-questions",
+      "pattern": "[\"']?type[\"']?\\s*:\\s*[\"']noul[\"']"
+    },
+    {
+      "id": "gateway-model",
+      "level": "medium",
+      "via": "http",
+      "source": "gateways",
+      "pattern": "[\"'](?:typesafe-ai|typesafe)/jev[\\w.-]*[\"']"
+    },
+    {
+      "id": "env",
+      "level": "medium",
+      "via": null,
+      "source": "py-sdk",
+      "pattern": "\\bTYPESAFE_(?:API_KEY|BASE_URL|DEFAULT_MODEL)\\b"
+    },
+    {
+      "id": "model",
+      "level": "medium",
+      "via": null,
+      "source": "py-sdk",
+      "pattern": "\\bjev-latest\\b"
+    },
+    {
+      "id": "noul",
+      "level": "medium",
+      "via": null,
+      "source": "py-readme",
+      "pattern": "\\bNoul\\b|\\bnoul\\s*\\("
+    },
+    {
+      "id": "shape-class",
+      "level": "medium",
+      "via": null,
+      "source": "py-readme",
+      "pattern": "\\b(?:Choice|Score)\\s*\\(\\s*(?:instructions|criteria)\\s*="
+    },
+    {
+      "id": "wire-type-other",
+      "level": "weak",
+      "via": null,
+      "source": "js-questions",
+      "pattern": "[\"']?type[\"']?\\s*:\\s*[\"'](?:choice|score)[\"']"
+    },
+    {
+      "id": "word",
+      "level": "weak",
+      "via": null,
+      "source": null,
+      "pattern": "(?i)\\bjev\\b|\\btypesafe\\b"
+    }
+  ]
+}

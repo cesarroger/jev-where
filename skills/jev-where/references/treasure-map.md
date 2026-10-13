@@ -9,9 +9,11 @@ step. Write it only when the user asks. It is a new file in the project root
 
 - Same content as the Markdown report, no extra claims. Never include secret
   values; locations only.
-- Precedents keep their exact names and URLs from this run's fetch, plus the
-  fetch date. If the lookup failed, set `precedent_lookup.status` to `"failed"`
-  and leave every `precedents` list empty.
+- Precedents keep their exact names and URLs from Jev Sightings or this run's
+  awesome-jev fetch. A sighting also keeps its permalink and verified date
+  (`"sighting": true`); a live-list entry has `"sighting": false`. If neither
+  source was available, set `precedent_lookup.status` to `"failed"` and leave
+  every `precedents` list empty.
 - Cutoffs are starting points; keep the `"starting_point": true` flag.
 - Use `null` for anything not visible, never a guess.
 
@@ -22,13 +24,14 @@ from any real run, and precedents must come from the run's own fetch.
 
 ```json
 {
-  "schema": "jev-where/treasure-map@1",
+  "schema": "jev-where/treasure-map@2",
   "generated": "2026-10-12",
   "project": "relative or absolute path that was scanned",
   "uses_jev_today": false,
   "precedent_lookup": {
     "status": "ok",
     "date": "2026-10-12",
+    "sightings": {"copy": "live", "generated": "2026-10-12", "verified": 74},
     "categories": ["Verification & Guardrails"],
     "note": null
   },
@@ -55,7 +58,12 @@ from any real run, and precedents must come from the run's own fetch.
       },
       "jev_sees": {"level": "personal", "send_less": "send line items and merchant only; strip card numbers and names"},
       "footprints": {"edits": 6, "recent_90d": 2, "fixes": 3, "complaints": 1},
-      "precedents": [{"name": "<entry name from this run's fetch>", "url": "<exact URL from the entry>", "category": "<category file>"}],
+      "precedents": [
+        {"name": "<name from the Sightings line>", "url": "<exact repo URL>", "sighting": true,
+         "permalink": "<exact permalink from the Sightings line>", "verified": "<date from the line>"},
+        {"name": "<entry name from this run's fetch>", "url": "<exact URL from the entry>", "sighting": false,
+         "category": "<category file>"}
+      ],
       "benefit": "...",
       "main_risk": "...",
       "poor_fit_if": "...",
@@ -83,7 +91,8 @@ run can match ideas even if their rank or wording changes.
 ## Since the last map
 
 If a `jev-where-map.json` from an earlier run exists, read it before writing
-the report and add this section before "Start here". Match ideas by `id`,
+the report and add this section before "Start here". Maps with schema `@1`
+are fine too; their precedents just lack the sighting fields. Match ideas by `id`,
 falling back to the same `where` location.
 
 ```markdown

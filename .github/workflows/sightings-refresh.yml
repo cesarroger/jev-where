@@ -1,0 +1,63 @@
+# Weekly upkeep for Jev Sightings: recheck every project on GitHub and list
+# projects not read yet. No API keys and no LLM; it uses the built-in GitHub
+# token and keeps one pull request, "sightings/refresh", up to date.
+# Needs Settings > Actions > General > "Allow GitHub Actions to create and approve pull requests".
+name: Jev Sightings refresh
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: sightings-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run the tests
+        run: python3 -m unittest discover tests
+
+      - name: Recheck projects and list unread ones
+        id: refresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -I tools/sightings/refresh.py --health --new --summary "$RUNNER_TEMP/summary.md"
+
+      - name: Validate the Sightings file
+        run: python3 -I tools/sightings/build.py --check
+
+      - name: Open or update the pull request
+        if: steps.refresh.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="sightings/refresh"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$branch"
+          git add -A skills/jev-where/sightings SIGHTINGS.md tools/sightings
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git commit -m "Jev Sightings: weekly refresh $(date -u +%Y-%m-%d)"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/${branch}"
+          state="$(gh pr view "$branch" --json state --jq .state 2>/dev/null || true)"
+          if [ "$state" = "OPEN" ]; then
+            gh pr edit "$branch" --body-file "$RUNNER_TEMP/summary.md"
+          else
+            gh pr create --head "$branch" --title "Jev Sightings: weekly refresh" --body-file "$RUNNER_TEMP/summary.md"
+          fi

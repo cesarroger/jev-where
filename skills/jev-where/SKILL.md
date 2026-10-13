@@ -6,8 +6,9 @@ description: >
   description for fuzzy decisions (regex or keyword heuristics, LLM calls that
   only return a label, score, or yes/no, routing, approval gates, moderation,
   ranking, agent loop choices), maps each to a typed Jev question (Choice,
-  Score, or Noul), cites precedents fetched live from the awesome-jev list, and
-  ranks the ideas by value, effort, and risk. Use whenever the user asks "where
+  Score, or Noul), cites verified precedents from Jev Sightings (projects where
+  Jev was spotted in the code, linked to the exact lines) and the live
+  awesome-jev list, and ranks the ideas by value, effort, and risk. Use whenever the user asks "where
   could I use Jev in this app", "find Jev use cases", "what decisions here
   could be typed", "suggest Jev integrations", "could Jev replace our
   classifier / router / LLM judge", "audit this repo for Jev opportunities", or
@@ -17,7 +18,7 @@ description: >
   pricing works, or for building a Jev integration when no opportunity analysis
   is wanted.
 license: MIT
-allowed-tools: Read Grep Glob Agent WebFetch(domain:raw.githubusercontent.com) WebFetch(domain:api.github.com) Bash(mktemp -d) Bash(mktemp -d *) Bash(curl -sSL https://raw.githubusercontent.com/yibie/awesome-jev/*) Bash(curl -sSL https://api.github.com/repos/yibie/awesome-jev/*) Bash(grep *) Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/jev_radar.py *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/jev_radar.py" *)
+allowed-tools: Read Grep Glob Agent WebFetch(domain:raw.githubusercontent.com) WebFetch(domain:api.github.com) Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/jev_fetch.py *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/jev_fetch.py" *) Bash(grep *) Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/jev_radar.py *) Bash(python3 "${CLAUDE_SKILL_DIR}/scripts/jev_radar.py" *)
 ---
 
 # JEV WHERE?
@@ -50,8 +51,9 @@ confidence cutoffs.
   needs one of these, say "check the official docs".
 - **No performance claims.** If you repeat a figure from an awesome-jev entry,
   attribute it to that entry and say it is unverified.
-- **Precedents come only from this run's fetch.** Never cite one from memory,
-  training data, or an earlier conversation.
+- **Precedents come only from Jev Sightings or this run's awesome-jev fetch.**
+  Never cite one from memory, training data, or an earlier conversation. Copy
+  names, URLs, and permalinks exactly from the lines you found.
 - **Analyze and suggest only.** Don't edit the user's files. Create a new file
   only when the user asks for one.
 
@@ -91,9 +93,9 @@ find them with Glob (or one plain `ls` or `find`), search with the Grep tool
 (or one plain `grep`), and keep every shell command single and plain, with no
 `cd &&`, pipes, or loops.
 
-Do step 4 (the precedent fetch) yourself, in the main conversation. Its
-commands are pre-approved for this turn, pages are saved to files rather than
-read whole, and only the matching lines come back, so it stays small. Then do
+Do step 4 (precedents) yourself, in the main conversation. Its commands are
+pre-approved for this turn, files are saved and searched rather than read
+whole, and only the matching lines come back, so it stays small. Then do
 the mapping, ranking, and report. If you can't start a subagent, do every step
 yourself.
 
@@ -195,35 +197,54 @@ the data lives, the typed question, and what the app would do with the answer.
 If nothing is grounded in existing data, say so and skip the section; don't
 invent features.
 
-### 4. Find precedents (live fetch)
+### 4. Find precedents: Jev Sightings first, then the live list
 
-Look up 1 to 2 real precedents per idea, and per Power Jewel, in the awesome-jev list
-(https://github.com/yibie/awesome-jev). Fetch it on every run; the skill keeps
-no stored copy.
+Look up 1 to 2 real precedents per idea, and per Power Jewel, from two
+sources, in this order:
 
-**How to fetch.** You need exact names and URLs, so prefer a method that
-returns the raw text:
+- **Jev Sightings:** this plugin's own list of projects where Jev was spotted
+  in the code, each linked to the exact lines, pinned to the commit that was
+  read. Read `references/sightings.md` for how to load it (newest copy from
+  GitHub, else the copy bundled with the skill), search it, recheck the
+  projects you cite, and cite them. Prefer a sighting whenever one fits.
+- **The awesome-jev list** (https://github.com/yibie/awesome-jev), fetched
+  live on every run, to find projects Sightings hasn't read yet. Steps 1 to 5
+  below. The skill keeps no copy of the list's text.
 
-- **Best:** run `mktemp -d` as a command on its own and note the path it
-  prints. Then fetch each page with one plain command,
-  `curl -sSL <url> -f -o <that path>/<name>.md`, typing the literal path: no
-  other options, no variables, and no `&&`, pipes, or loops. The `-f` makes a
-  missing page fail instead of saving an error page as if it were the list.
-  Then search the saved files with the Grep tool if this session has one;
-  otherwise use one plain `grep -n -i -E '<pattern>' <file>` command per
-  search. Used exactly this way, these commands are pre-approved for the turn
-  that runs the skill, so they don't stop for permission.
-- **Next:** a read-only GitHub file tool, if one is available.
-- **Last:** WebFetch. It may paraphrase long lines, so ask it for each entry's
-  name and URL exactly, and treat its summaries as approximate.
+When a live-list entry is in Sightings as `no-jev-found`, don't cite it.
+Label a live-list entry Sightings hasn't read as "listed on awesome-jev, not
+yet verified".
 
-1. **Category list.** Fetch
-   `https://raw.githubusercontent.com/yibie/awesome-jev/main/README.md` and
-   take only the lines under "Current coverage" that link `categories/<file>.md`.
-   The README also repeats every entry from every category. Don't read or cite
-   from that full list: it defeats fetching only the relevant categories. If
-   the README fails, list the folder with
-   `https://api.github.com/repos/yibie/awesome-jev/contents/categories`.
+**How to fetch.** Use the bundled fetcher. It knows the few pages the skill
+needs, builds their URLs itself, refuses other hosts, saves each page into a
+temporary folder it creates, and prints only a short status line per page,
+never the page itself. Run it as one plain command (no `&&`, pipes, loops, or
+variables):
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/scripts/jev_fetch.py" sightings categories
+```
+
+The first line it prints is the folder. Pass it back on later calls with
+`--dir <that folder>`, typing the literal path:
+
+- `sightings`: the newest Jev Sightings file, else the bundled copy
+- `categories`: awesome-jev's category list
+- `category:<slug>`: one category file
+- `repo:<owner>/<name>`: GitHub's facts for one project; up to 10 per call
+
+Add `--offline` when there is no network: it then makes no requests and uses
+the bundled Sightings. Search the saved files with the Grep tool if this
+session has one, or else one plain `grep -n -i -E '<pattern>' <file>` command
+per search. Used exactly this way, these commands are pre-approved for the
+turn that runs the skill, so they don't stop for permission. If the fetcher
+can't run, a read-only GitHub file tool is the next choice, and WebFetch the
+last. WebFetch paraphrases, so ask it for each entry's name and URL exactly,
+and treat its summaries as approximate.
+
+1. **Category list.** The `categories` target saves `categories.txt`, one
+   `slug<TAB>title` line per category. It reads them from the README's
+   "Current coverage" section, falling back to the folder listing.
 2. **Pick categories.** Fetch only the categories that match the decision points
    from step 2, usually 2 to 4. Match by name against the live list. Typical
    pairings, which may drift as the list changes:
@@ -243,9 +264,9 @@ returns the raw text:
    | UI that changes live | Adaptive & Realtime UI |
    | Choosing thresholds | Calibration & Research |
 
-3. **Fetch.** Get each chosen file from
-   `https://raw.githubusercontent.com/yibie/awesome-jev/main/categories/<file>.md`
-   and keep only the entry lines, which look like
+3. **Fetch.** Get the chosen files in one call, for example
+   `... jev_fetch.py --dir <folder> category:classification-routing category:content-moderation`.
+   Keep only the entry lines, which look like
    `- [Name](URL) - Industry: one-sentence summary`. Each file also has a
    template line in that same shape under "Submission format", literally
    `- [Name](URL) - ...`. Skip it; it isn't an entry.
@@ -260,15 +281,25 @@ returns the raw text:
    production use. When an entry calls itself a demo or prototype, say so.
    Use discussion threads only when no project entry fits.
 
-**If the lookup fails** (no fetch tool, network error, HTTP 403, 404, or 429,
-a `curl -f` command that exits with an error, or a page that no longer has the
-expected structure), say so in one plain
-sentence with the reason, for example: "Precedent lookup failed:
-raw.githubusercontent.com returned 429." Try the fallback listing only when the
-README itself failed or changed. With no network or no fetch tool, skip it.
-Then continue and write `Precedent: no precedent lookup available` on every
-idea. If some categories load and others fail, cite from the ones that loaded
-and label the rest. Don't fill gaps from memory.
+**If the live lookup fails** (the fetcher reports `failed` with a reason such
+as HTTP 403, 404, or 429, or a page no longer has the expected structure), say
+so in one plain sentence with the reason, for example: "awesome-jev lookup
+failed: HTTP 429." If some categories load and others fail, cite from the
+ones that loaded and label the rest.
+
+If you already know there is no network (the session says so), run the
+fetcher with `--offline sightings` only, and say so once in the scope lines.
+
+Jev Sightings still works without the network, from the bundled copy: cite
+those sightings labelled "not rechecked today". When nothing fits, write one
+of these:
+- `no precedent lookup available` when neither source could be searched
+- `none found` when both were searched
+- `none found in Jev Sightings; awesome-jev lookup unavailable` when only
+  Sightings could be searched
+
+Offline, mention the reranking fit warning from step 6 without a link, as
+unverified. Don't fill gaps from memory.
 
 ### 5. Rank and group
 
@@ -334,11 +365,14 @@ already sits in the project root, read it before writing the report and add a
 
 Open with one or two lines on scope: what you analyzed (and what you skipped, if
 anything), whether the app already uses Jev, and the precedent lookup result.
-Give the run date, and either the categories fetched or the failure sentence
-from step 4. When you cite any precedent, add once: "Listings on awesome-jev
-are not endorsements." Then one glossary line: "Choice picks one option from a
-list. Score places something on ordered levels. Noul is the probability that a
-yes/no statement is true."
+Give the run date, the Jev Sightings copy used (live or bundled, its date, and
+its verified count), and either the awesome-jev categories fetched or the
+failure sentence from step 4. When you cite any precedent, add once:
+"Sightings and awesome-jev listings are not endorsements." Then one glossary
+line: "Choice picks one option from a list. Score places something on ordered
+levels. Noul is the probability that a yes/no statement is true. A Jev
+sighting is a project where Jev was found in the code, linked to the exact
+lines."
 
 Then a ranking table (rank, idea, shape, effort, value, risk). Then each idea:
 
@@ -366,9 +400,13 @@ Then a ranking table (rank, idea, shape, effort, value, risk). Then each idea:
   to Jev, and the send-less tip (fewest fields; what to strip or mask first)
 - **Footprints:** only when the radar found some, e.g. "edited 7 times, 3 in
   the last 90 days, 2 fix commits"
-- **Precedent:** [Name](URL) (Category): why it is similar. If the lookup
-  failed: no precedent lookup available. If it worked but nothing fit: none
-  found in the categories fetched
+- **Precedent:** for a sighting: Jev sighting, [Name](URL): the shape and
+  decision at [path:line](permalink), language; why it is similar (verified
+  <date>, live today | not rechecked today | archived). For a live-list entry:
+  [Name](URL) (Category, listed on awesome-jev, not yet verified): why it is
+  similar. If nothing fits, use the wording from step 4: no precedent lookup
+  available, none found, or none found in Jev Sightings; awesome-jev lookup
+  unavailable
 - **Benefit:** what improves
 - **Main risk:** what could go wrong
 - **Poor fit if:** conditions that would make Jev the wrong choice here

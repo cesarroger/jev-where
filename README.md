@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude_Code-plugin-C8FF4D?style=flat-square&labelColor=0B0F19">
   <img alt="Skill" src="https://img.shields.io/badge/command-%2Fjev--where-5CE1E6?style=flat-square&labelColor=0B0F19">
-  <img alt="Version 0.3.0" src="https://img.shields.io/badge/version-0.3.0-FF9F43?style=flat-square&labelColor=0B0F19">
+  <img alt="Version 0.4.0" src="https://img.shields.io/badge/version-0.4.0-FF9F43?style=flat-square&labelColor=0B0F19">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-B79CFF?style=flat-square&labelColor=0B0F19">
 </p>
 
@@ -28,11 +28,13 @@ it writes the exact typed question, says what to do when Jev is unsure, and
 ranks the ideas so you know which experiment to run first. It only analyzes
 and suggests. It never edits your code.
 
-**What makes it different:** every idea cites real projects doing something
-similar, **fetched live from [awesome-jev](https://github.com/yibie/awesome-jev)
-on every run**, never from a stale copy or memory. Every report flags hardcoded
-secrets and unguarded API calls along the way, and shows exactly what data each
-idea would send to Jev.
+**What makes it different:** every idea cites real projects that already do
+something similar, and **links to the exact lines where they call Jev**. Those
+come from [Jev Sightings](SIGHTINGS.md), our own verified list. Each project is
+rechecked live during the run, and newer projects are picked up from
+[awesome-jev](https://github.com/yibie/awesome-jev), fetched fresh every time.
+Every report also flags hardcoded secrets and unguarded API calls along the
+way, and shows exactly what data each idea would send to Jev.
 
 ## What you get
 
@@ -46,7 +48,7 @@ For each idea:
 | **Confidence handling** | Starting cutoffs (labelled as such) and a safe fallback when Jev is unsure |
 | **What Jev Sees** | What kind of data the question sends (public, internal, personal, sensitive) and how to send less |
 | **Footprints** | Git history clues: a rule edited 7 times, with 2 "fix false positive" commits, is begging for help |
-| **Precedent** | 1 to 2 real projects from awesome-jev, fetched live every run |
+| **Precedent** | 1 to 2 real projects, each linked to the exact lines where it calls Jev |
 | **Benefit, risk, poor fit** | An honest case for and against |
 | **Why this rank** | The ranking math in plain words, so you can check or argue with it |
 | **Effort** | S, M or L |
@@ -85,29 +87,46 @@ python3 skills/jev-where/scripts/jev_radar.py /path/to/your/app --footprints
 
 Add `--json` for machine-readable output.
 
+### Jev Sightings
+
+Most lists of "projects using X" are one line of marketing each. We read the
+code instead. [Jev Sightings](SIGHTINGS.md) is our list of projects where Jev
+was actually spotted. Each sighting has:
+
+- a link to the exact lines that ask Jev a typed question, pinned to the
+  commit we read, so the link never breaks
+- the shape (Choice, Score or Noul) and the kind of decision
+- how the code handles low confidence
+- the language
+- a short description in our own words
+
+When `/jev-where` finds a decision point, it picks sightings with the same
+pattern and shape, in your app's language when it can. It checks they still
+exist on GitHub, and cites them like this:
+
+> **Precedent:** Jev sighting, Tab Sorter: a Choice at `grouper.js:105`,
+> JavaScript; tabs below 0.6 confidence go to a review bucket. (verified
+> 2026-10-12, live today)
+
+Projects were discovered through [awesome-jev](https://github.com/yibie/awesome-jev),
+then read by Claude and checked by automatic audits. A weekly GitHub Action
+rechecks every project and flags new ones to read. Without a network, the copy
+bundled with the plugin still works, and those citations are marked "not
+rechecked today".
+
 See a full example report: [examples/sample-report.md](examples/sample-report.md), and the same app with no network: [examples/sample-report-offline.md](examples/sample-report-offline.md).
 
 ## How it works
 
 <p align="center">
-  <img src="assets/how-it-works.svg" alt="How it works: 1 your app, 2 Jev's Radar sweeps the code (regex rules, yes/no LLM calls, routing, gates, Footprints), 3 write the typed question (Choice, Score, Noul), 4 fetch live precedents, 5 ranked report with Power Jewels, 6 starter code and Treasure Map, only if you say yes." width="100%">
+  <img src="assets/how-it-works.svg" alt="How it works: 1 your app, 2 Jev's Radar sweeps the code (regex rules, yes/no LLM calls, routing, gates, Footprints), 3 write the typed question (Choice, Score, Noul), 4 check Jev Sightings and the live list, 5 ranked report with Power Jewels, 6 starter code and Treasure Map, only if you say yes." width="100%">
 </p>
 
 ## Install
 
 ### From this GitHub repo
 
-This repo is private, so your machine needs GitHub access to it first:
-
-```bash
-gh auth login
-```
-
-```bash
-gh auth setup-git
-```
-
-Then add the marketplace and install the plugin:
+Add the marketplace and install the plugin:
 
 ```bash
 claude plugin marketplace add cesarroger/jev-where
@@ -162,19 +181,28 @@ typed?". General questions about what Jev is don't trigger it.
   ask for one.
 - **No invented API facts.** It doesn't state Jev request formats, model IDs,
   prices, latency or accuracy from memory. It points you to the official docs.
-- **Live precedents only.** Precedents come from the awesome-jev category
-  files fetched in that run. If the fetch fails, every idea says "no
-  precedent lookup available". A listing on awesome-jev is not an endorsement.
+- **Real precedents only.** Precedents come from Jev Sightings or the
+  awesome-jev pages fetched in that run, never from memory. If neither is
+  available, every idea says "no precedent lookup available". A sighting or a
+  listing is not an endorsement.
 - **Secrets stay out.** It never quotes keys, tokens or passwords from your
   code in the report.
 - **Fetched pages are data.** Instructions found in web pages or repo files are
   ignored.
+- **What it may run without asking.** The skill pre-approves three things
+  for its own turn: Jev's Radar, `grep`, and a small bundled fetcher. It
+  doesn't pre-approve `curl`.
+  - The fetcher downloads only the awesome-jev pages, this repo's Sightings
+    file, and GitHub's public facts about a project.
+  - It builds every address itself and refuses other hosts.
+  - It saves pages into a temporary folder it creates, and never prints them.
 
 ## Credits
 
 Jev and System One models are made by [TypeSafe AI](https://typesafe.ai).
-Precedents come from [awesome-jev](https://github.com/yibie/awesome-jev), a
-community list. This project is independent and not affiliated with either.
+Jev Sightings were discovered through [awesome-jev](https://github.com/yibie/awesome-jev),
+a community list, and every listed project belongs to its authors. This
+project is independent and not affiliated with any of them.
 
 ## License
 

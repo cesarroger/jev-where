@@ -8,7 +8,7 @@ request format, field names, SDKs, and auth, check the official docs.
 
 - What the sources state
 - Choosing a shape
-- Patterns 1 to 14
+- Patterns 1 to 14 (each with its Jev Sightings tag)
 - When Jev is the wrong tool
 - Confidence handling: starting points
 - What Jev Sees: data levels
@@ -55,6 +55,7 @@ answers in code.
 
 ### 1. Intent or ticket routing
 
+- **Sightings tag:** `intent-routing`
 - **Shape:** Choice
 - **Replaces:** regex or keyword rules that pick a team, queue, or handler
 - **Example:** "Which team should handle the request in `ticket.body`?"
@@ -66,6 +67,7 @@ answers in code.
 
 ### 2. Model or handler routing
 
+- **Sightings tag:** `model-routing`
 - **Shape:** Choice, often with a Noul gate
 - **Replaces:** "send everything to the big model", or length-based routing
 - **Example:** "Which handler fits the request in `prompt`?" Options:
@@ -78,6 +80,7 @@ answers in code.
 
 ### 3. Fuzzy keyword or regex check
 
+- **Sightings tag:** `fuzzy-check`
 - **Shape:** Noul
 - **Replaces:** `if "refund" in text.lower()`, sentiment word lists,
   hand-tuned regexes
@@ -87,6 +90,7 @@ answers in code.
 
 ### 4. Multi-label tagging
 
+- **Sightings tag:** `multi-label`
 - **Shape:** one Noul per label
 - **Replaces:** chains of keyword checks, or an LLM asked to "return all
   applicable tags as JSON"
@@ -97,6 +101,7 @@ answers in code.
 
 ### 5. Severity, urgency, or priority
 
+- **Sightings tag:** `severity`
 - **Shape:** Score
 - **Replaces:** keyword-to-priority maps ("urgent", "asap", "down")
 - **Example:** "How urgent is the issue in `ticket.body`?" Levels: `0` routine
@@ -107,6 +112,7 @@ answers in code.
 
 ### 6. Rubric grading and LLM-as-judge
 
+- **Sightings tag:** `rubric-judge`
 - **Shape:** one Score per rubric dimension, combined with weights in code
 - **Replaces:** an LLM prompt that returns "a score from 1 to 10"
 - **Example:** "How completely does `answer` address `question`?" Levels:
@@ -117,6 +123,7 @@ answers in code.
 
 ### 7. Approval or eligibility gate
 
+- **Sightings tag:** `approval-gate`
 - **Shape:** one Noul per condition; the policy stays in code
 - **Replaces:** brittle rules over free-text justifications
 - **Example:** Nouls "Does `request.reason` describe a duplicate charge?",
@@ -127,6 +134,7 @@ answers in code.
 
 ### 8. Content moderation
 
+- **Sightings tag:** `moderation`
 - **Shape:** one Noul per policy category, optionally a Score for severity
 - **Replaces:** profanity lists and regex filters
 - **Example:** Nouls "Does `message` contain a threat of violence?", "Does
@@ -137,6 +145,7 @@ answers in code.
 
 ### 9. Output verification
 
+- **Sightings tag:** `output-verification`
 - **Shape:** Choice (or Noul)
 - **Replaces:** no check at all, or a second LLM call that "double-checks"
 - **Example:** "Is `claim` supported by `source_passage`?" Options:
@@ -146,6 +155,7 @@ answers in code.
 
 ### 10. Agent guardrail
 
+- **Sightings tag:** `agent-guardrail`
 - **Shape:** Noul, failing closed
 - **Replaces:** allowlists that miss intent, or no check
 - **Example:** Noul "Does `tool_call` delete or overwrite user data that
@@ -156,6 +166,7 @@ answers in code.
 
 ### 11. Agent next step
 
+- **Sightings tag:** `agent-next-step`
 - **Shape:** Choice
 - **Replaces:** LLM free-text "what should I do next" parsing
 - **Example:** "What should the agent do next, given `goal` and
@@ -166,6 +177,7 @@ answers in code.
 
 ### 12. Pick a value from candidates
 
+- **Sightings tag:** `pick-value`
 - **Shape:** Choice over candidates that code found
 - **Replaces:** asking an LLM to extract a field as text
 - **Example:** Code finds every date in an email. "Which of these is the
@@ -175,6 +187,7 @@ answers in code.
 
 ### 13. Duplicate or match detection
 
+- **Sightings tag:** `duplicate-match`
 - **Shape:** Noul per candidate pair, after code narrows the pairs
 - **Replaces:** fuzzy string-similarity thresholds
 - **Example:** Noul "Do `ticket_a` and `ticket_b` report the same underlying
@@ -184,6 +197,7 @@ answers in code.
 
 ### 14. Relevance filtering and reranking
 
+- **Sightings tag:** `relevance-rerank`
 - **Shape:** Noul per candidate ("Does `passage` help answer `query`?") or a
   Score per candidate
 - **Replaces:** fixed similarity cutoffs, or an LLM reranker

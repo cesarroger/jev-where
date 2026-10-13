@@ -1,8 +1,8 @@
 {
   "name": "jev-where",
   "displayName": "JEV WHERE?",
-  "version": "0.3.0",
-  "description": "Find and rank the places in an app where Jev typed decisions could replace keyword rules, label-only LLM calls, routing, approval gates, or ranking. Adds /jev-where.",
+  "version": "0.4.0",
+  "description": "Find and rank the places in an app where Jev typed decisions could replace keyword rules, label-only LLM calls, routing, approval gates, or ranking, with verified precedents linked to the exact lines where other projects call Jev. Adds /jev-where.",
   "author": {
     "name": "Cesar Peralta"
   },
@@ -14,6 +14,7 @@
     "typesafe",
     "system-one",
     "typed-decisions",
-    "code-audit"
+    "code-audit",
+    "jev-sightings"
   ]
 }
