@@ -192,7 +192,7 @@ class AuditTests(unittest.TestCase):
         self.assertIn("copies 6+ words from the README", "; ".join(self.problems(r)))
         r["about"] = "see https://example.com"
         self.assertIn("contains a link", "; ".join(self.problems(r)))
-        r["about"] = "token sk-abcdefghijklmnop1234"
+        r["about"] = "token sk-FAKE-for-tests-only"
         self.assertIn("secret", "; ".join(self.problems(r)))
         r = good_read()
         r["calls"][0]["decides"] = "hides spoilers in comments with one yes/no question per comment"
