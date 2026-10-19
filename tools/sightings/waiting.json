@@ -16,6 +16,14 @@
   ]
  },
  {
+  "repo": "abhimanyupandian/hafen",
+  "name": "Hafen",
+  "url": "https://github.com/abhimanyupandian/hafen",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
   "repo": "ably-labs/jev-pong",
   "name": "Jev Pong",
   "url": "https://github.com/ably-labs/jev-pong",
@@ -136,6 +144,14 @@
   ]
  },
  {
+  "repo": "caiweihan/jev-account-filter",
+  "name": "Jev Account Filter",
+  "url": "https://github.com/caiweihan/jev-account-filter",
+  "categories": [
+   "data-labeling-curation"
+  ]
+ },
+ {
   "repo": "ChenneyZhuang/laya-browser-agent",
   "name": "laya-browser-agent",
   "url": "https://github.com/ChenneyZhuang/laya-browser-agent",
@@ -248,6 +264,14 @@
   ]
  },
  {
+  "repo": "divingsbysangam/typesafe-jev-salesforce",
+  "name": "TypeSafe Jev x Salesforce",
+  "url": "https://github.com/divingsbysangam/typesafe-jev-salesforce",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
   "repo": "doeixd/jev-pref",
   "name": "jev-pref",
   "url": "https://github.com/doeixd/jev-pref",
@@ -309,6 +333,14 @@
   "url": "https://github.com/ethanplusai/jev-chat-for-twitch",
   "categories": [
    "content-moderation"
+  ]
+ },
+ {
+  "repo": "Eve2512/Strayguard",
+  "name": "strayguard",
+  "url": "https://github.com/Eve2512/Strayguard",
+  "categories": [
+   "verification-guardrails"
   ]
  },
  {
@@ -392,6 +424,14 @@
   ]
  },
  {
+  "repo": "Geneonosis/neutron-email-triage",
+  "name": "Neutron Email Triage",
+  "url": "https://github.com/Geneonosis/neutron-email-triage",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
   "repo": "GiesN/typesafe-jev-workflow",
   "name": "Jev email intent workflow",
   "url": "https://github.com/GiesN/typesafe-jev-workflow",
@@ -419,6 +459,14 @@
   "repo": "gtaras7/typesafe-jev",
   "name": "typesafe-jev CV screener",
   "url": "https://github.com/gtaras7/typesafe-jev",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
+  "repo": "guow7394/ecom-cs-agent",
+  "name": "E-commerce after-sales agent",
+  "url": "https://github.com/guow7394/ecom-cs-agent",
   "categories": [
    "classification-routing"
   ]
@@ -509,14 +557,6 @@
   "url": "https://github.com/jev-chat/jev-chat-jarvis",
   "categories": [
    "agent-decisions"
-  ]
- },
- {
-  "repo": "jev-ids/jev-ids",
-  "name": "Jev IDS",
-  "url": "https://github.com/jev-ids/jev-ids",
-  "categories": [
-   "evaluation-benchmarking"
   ]
  },
  {
@@ -642,7 +682,7 @@
  {
   "repo": "Kilo-Org/cloud",
   "name": "Kilo Code auto-routing",
-  "url": "https://github.com/Kilo-Org/cloud/pull/7223",
+  "url": "https://github.com/Kilo-Org/cloud",
   "categories": [
    "classification-routing"
   ]
@@ -666,7 +706,7 @@
  {
   "repo": "klauswg/jev-suite",
   "name": "jev-rental",
-  "url": "https://github.com/klauswg/jev-suite/tree/master/jev-rental",
+  "url": "https://github.com/klauswg/jev-suite",
   "categories": [
    "classification-routing",
    "verification-guardrails"
@@ -857,6 +897,14 @@
   ]
  },
  {
+  "repo": "ondata/vd-jev",
+  "name": "vd-jev",
+  "url": "https://github.com/ondata/vd-jev",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
   "repo": "oppih/approval-judge-bridge",
   "name": "approval-judge-bridge",
   "url": "https://github.com/oppih/approval-judge-bridge",
@@ -945,6 +993,22 @@
   ]
  },
  {
+  "repo": "rahulbansalc6414/jev-as-a-guardrail",
+  "name": "Jev vs Claude Haiku 4.5 as input guardrails",
+  "url": "https://github.com/rahulbansalc6414/jev-as-a-guardrail",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
+  "repo": "raxITlabs/decision-models-as-guardrails",
+  "name": "Decision Models as Guardrails",
+  "url": "https://github.com/raxITlabs/decision-models-as-guardrails",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
   "repo": "ReallyArtificial/jev-by-example",
   "name": "Jev by Example",
   "url": "https://github.com/ReallyArtificial/jev-by-example",
@@ -1025,6 +1089,14 @@
   ]
  },
  {
+  "repo": "septagos/subcento",
+  "name": "Subcento",
+  "url": "https://github.com/septagos/subcento",
+  "categories": [
+   "verification-guardrails"
+  ]
+ },
+ {
   "repo": "shimo4228/jev-research-pipeline",
   "name": "jev-research-pipeline",
   "url": "https://github.com/shimo4228/jev-research-pipeline",
@@ -1097,6 +1169,14 @@
   ]
  },
  {
+  "repo": "soderlind/jev-mail-triage",
+  "name": "jev-mail-triage",
+  "url": "https://github.com/soderlind/jev-mail-triage",
+  "categories": [
+   "verification-guardrails"
+  ]
+ },
+ {
   "repo": "souvikr/jev-test",
   "name": "jev-test",
   "url": "https://github.com/souvikr/jev-test",
@@ -1113,9 +1193,9 @@
   ]
  },
  {
-  "repo": "sunyasheng/JevDeepResearch",
-  "name": "Jev Deep Research",
-  "url": "https://github.com/sunyasheng/JevDeepResearch",
+  "repo": "sunyasheng/JevGPT",
+  "name": "JevGPT",
+  "url": "https://github.com/sunyasheng/JevGPT",
   "categories": [
    "scoring-ranking"
   ]
@@ -1201,17 +1281,9 @@
   ]
  },
  {
-  "repo": "uehaj/jev-semgrep",
-  "name": "jev-semgrep",
-  "url": "https://github.com/uehaj/jev-semgrep",
-  "categories": [
-   "scoring-ranking"
-  ]
- },
- {
-  "repo": "usenotra/notra",
-  "name": "Notra",
-  "url": "https://github.com/usenotra/notra",
+  "repo": "trungnt13/claude-system1",
+  "name": "System1 Thinking",
+  "url": "https://github.com/trungnt13/claude-system1",
   "categories": [
    "classification-routing"
   ]
@@ -1313,14 +1385,6 @@
   ]
  },
  {
-  "repo": "xyzzzh/GroundingJev",
-  "name": "GroundingJev",
-  "url": "https://github.com/xyzzzh/GroundingJev",
-  "categories": [
-   "data-labeling-curation"
-  ]
- },
- {
   "repo": "Yaxin9Luo/spending-effort-with-jev",
   "name": "spending-effort-with-jev",
   "url": "https://github.com/Yaxin9Luo/spending-effort-with-jev",
@@ -1387,7 +1451,7 @@
  {
   "repo": "zilliztech/memsearch",
   "name": "MemSearch Jev reranking",
-  "url": "https://github.com/zilliztech/memsearch/blob/main/evaluation/reranking-evaluation.md",
+  "url": "https://github.com/zilliztech/memsearch",
   "categories": [
    "scoring-ranking"
   ]
