@@ -16,6 +16,14 @@
   ]
  },
  {
+  "repo": "abhimanyupandian/hafen",
+  "name": "Hafen",
+  "url": "https://github.com/abhimanyupandian/hafen",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
   "repo": "ably-labs/jev-pong",
   "name": "Jev Pong",
   "url": "https://github.com/ably-labs/jev-pong",
@@ -64,11 +72,27 @@
   ]
  },
  {
+  "repo": "AIAnytime/Jev-Router",
+  "name": "Jev Router",
+  "url": "https://github.com/AIAnytime/Jev-Router",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
   "repo": "AiPersonacademy/jev-resume-disqualifier",
   "name": "jev-resume-disqualifier",
   "url": "https://github.com/AiPersonacademy/jev-resume-disqualifier",
   "categories": [
    "classification-routing"
+  ]
+ },
+ {
+  "repo": "Alex-Alas/jev-guard",
+  "name": "jev-guard",
+  "url": "https://github.com/Alex-Alas/jev-guard",
+  "categories": [
+   "content-moderation"
   ]
  },
  {
@@ -112,6 +136,14 @@
   ]
  },
  {
+  "repo": "bit-cook/Jev-X-Blocker",
+  "name": "Jev X Blocker",
+  "url": "https://github.com/bit-cook/Jev-X-Blocker",
+  "categories": [
+   "content-moderation"
+  ]
+ },
+ {
   "repo": "bitnovus/jev-spam-eval",
   "name": "jev-spam-eval",
   "url": "https://github.com/bitnovus/jev-spam-eval",
@@ -136,6 +168,14 @@
   ]
  },
  {
+  "repo": "caiweihan/jev-account-filter",
+  "name": "Jev Account Filter",
+  "url": "https://github.com/caiweihan/jev-account-filter",
+  "categories": [
+   "data-labeling-curation"
+  ]
+ },
+ {
   "repo": "ChenneyZhuang/laya-browser-agent",
   "name": "laya-browser-agent",
   "url": "https://github.com/ChenneyZhuang/laya-browser-agent",
@@ -149,6 +189,14 @@
   "url": "https://github.com/chy4pro/jev-for-chrome",
   "categories": [
    "agent-decisions"
+  ]
+ },
+ {
+  "repo": "Civalski/claujev",
+  "name": "ClauJev",
+  "url": "https://github.com/Civalski/claujev",
+  "categories": [
+   "verification-guardrails"
   ]
  },
  {
@@ -224,6 +272,14 @@
   ]
  },
  {
+  "repo": "Day-in-the-Country-LLC/bot-derby",
+  "name": "Bot Derby",
+  "url": "https://github.com/Day-in-the-Country-LLC/bot-derby",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
   "repo": "devagrawal09/jev-review",
   "name": "jev-review",
   "url": "https://github.com/devagrawal09/jev-review",
@@ -245,6 +301,14 @@
   "url": "https://github.com/Dicklesworthstone/skillranker",
   "categories": [
    "agent-decisions"
+  ]
+ },
+ {
+  "repo": "divingsbysangam/typesafe-jev-salesforce",
+  "name": "TypeSafe Jev x Salesforce",
+  "url": "https://github.com/divingsbysangam/typesafe-jev-salesforce",
+  "categories": [
+   "classification-routing"
   ]
  },
  {
@@ -304,11 +368,27 @@
   ]
  },
  {
+  "repo": "Eliot5566/s1kit",
+  "name": "s1kit",
+  "url": "https://github.com/Eliot5566/s1kit",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
   "repo": "ethanplusai/jev-chat-for-twitch",
   "name": "Jev Chat for Twitch",
   "url": "https://github.com/ethanplusai/jev-chat-for-twitch",
   "categories": [
    "content-moderation"
+  ]
+ },
+ {
+  "repo": "Eve2512/Strayguard",
+  "name": "strayguard",
+  "url": "https://github.com/Eve2512/Strayguard",
+  "categories": [
+   "verification-guardrails"
   ]
  },
  {
@@ -392,6 +472,14 @@
   ]
  },
  {
+  "repo": "Geneonosis/neutron-email-triage",
+  "name": "Neutron Email Triage",
+  "url": "https://github.com/Geneonosis/neutron-email-triage",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
   "repo": "GiesN/typesafe-jev-workflow",
   "name": "Jev email intent workflow",
   "url": "https://github.com/GiesN/typesafe-jev-workflow",
@@ -424,6 +512,14 @@
   ]
  },
  {
+  "repo": "guow7394/ecom-cs-agent",
+  "name": "E-commerce after-sales agent",
+  "url": "https://github.com/guow7394/ecom-cs-agent",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
   "repo": "Hangzhi/diffusion-jev-sglang",
   "name": "Diffusion Jev",
   "url": "https://github.com/Hangzhi/diffusion-jev-sglang",
@@ -437,6 +533,14 @@
   "url": "https://github.com/Hanno-Labs/decision-bench",
   "categories": [
    "evaluation-benchmarking"
+  ]
+ },
+ {
+  "repo": "harsaas/medgemma_Ophthalmology_jev",
+  "name": "MedGemma Ophthalmology + JEV",
+  "url": "https://github.com/harsaas/medgemma_Ophthalmology_jev",
+  "categories": [
+   "verification-guardrails"
   ]
  },
  {
@@ -496,6 +600,14 @@
   ]
  },
  {
+  "repo": "isaacbitran/jev-bias-audit",
+  "name": "Jev bias audit",
+  "url": "https://github.com/isaacbitran/jev-bias-audit",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
   "repo": "ivipinmishra/decision-models-showdown",
   "name": "Decision Models Showdown",
   "url": "https://github.com/ivipinmishra/decision-models-showdown",
@@ -509,14 +621,6 @@
   "url": "https://github.com/jev-chat/jev-chat-jarvis",
   "categories": [
    "agent-decisions"
-  ]
- },
- {
-  "repo": "jev-ids/jev-ids",
-  "name": "Jev IDS",
-  "url": "https://github.com/jev-ids/jev-ids",
-  "categories": [
-   "evaluation-benchmarking"
   ]
  },
  {
@@ -642,9 +746,17 @@
  {
   "repo": "Kilo-Org/cloud",
   "name": "Kilo Code auto-routing",
-  "url": "https://github.com/Kilo-Org/cloud/pull/7223",
+  "url": "https://github.com/Kilo-Org/cloud",
   "categories": [
    "classification-routing"
+  ]
+ },
+ {
+  "repo": "kint4/playwright-system1-triage",
+  "name": "playwright-system1-triage",
+  "url": "https://github.com/kint4/playwright-system1-triage",
+  "categories": [
+   "verification-guardrails"
   ]
  },
  {
@@ -653,6 +765,14 @@
   "url": "https://github.com/kitfunso/hippo-memory",
   "categories": [
    "scoring-ranking"
+  ]
+ },
+ {
+  "repo": "kittimzhe/dsh-jev-goal-judge",
+  "name": "dsh-jev-goal-judge",
+  "url": "https://github.com/kittimzhe/dsh-jev-goal-judge",
+  "categories": [
+   "agent-decisions"
   ]
  },
  {
@@ -666,7 +786,7 @@
  {
   "repo": "klauswg/jev-suite",
   "name": "jev-rental",
-  "url": "https://github.com/klauswg/jev-suite/tree/master/jev-rental",
+  "url": "https://github.com/klauswg/jev-suite",
   "categories": [
    "classification-routing",
    "verification-guardrails"
@@ -737,6 +857,14 @@
   ]
  },
  {
+  "repo": "lewistouchtech/opencode-jev-safe-compact",
+  "name": "opencode-jev-safe-compact",
+  "url": "https://github.com/lewistouchtech/opencode-jev-safe-compact",
+  "categories": [
+   "agent-decisions"
+  ]
+ },
+ {
   "repo": "lexmount/jev-browser-bridge",
   "name": "jev-browser-bridge",
   "url": "https://github.com/lexmount/jev-browser-bridge",
@@ -750,6 +878,14 @@
   "url": "https://github.com/lexmount/WebJev",
   "categories": [
    "agent-decisions"
+  ]
+ },
+ {
+  "repo": "liaocaoxuezhe/x-reply-judge-jev",
+  "name": "X Reply Judge",
+  "url": "https://github.com/liaocaoxuezhe/x-reply-judge-jev",
+  "categories": [
+   "classification-routing"
   ]
  },
  {
@@ -809,11 +945,35 @@
   ]
  },
  {
+  "repo": "mikluko/stalwart-jev",
+  "name": "stalwart-jev",
+  "url": "https://github.com/mikluko/stalwart-jev",
+  "categories": [
+   "content-moderation"
+  ]
+ },
+ {
+  "repo": "monumei/typesafe-cascade",
+  "name": "typesafe-cascade",
+  "url": "https://github.com/monumei/typesafe-cascade",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
   "repo": "MorDavid/NucleiSniper",
   "name": "NucleiSniper",
   "url": "https://github.com/MorDavid/NucleiSniper",
   "categories": [
    "verification-guardrails"
+  ]
+ },
+ {
+  "repo": "n9omi/jev-calibration-audit",
+  "name": "Jev calibration audit",
+  "url": "https://github.com/n9omi/jev-calibration-audit",
+  "categories": [
+   "evaluation-benchmarking"
   ]
  },
  {
@@ -857,6 +1017,22 @@
   ]
  },
  {
+  "repo": "ondata/vd-jev",
+  "name": "vd-jev",
+  "url": "https://github.com/ondata/vd-jev",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
+  "repo": "onlyreadai/onlyread",
+  "name": "OnlyRead",
+  "url": "https://github.com/onlyreadai/onlyread",
+  "categories": [
+   "verification-guardrails"
+  ]
+ },
+ {
   "repo": "oppih/approval-judge-bridge",
   "name": "approval-judge-bridge",
   "url": "https://github.com/oppih/approval-judge-bridge",
@@ -870,6 +1046,14 @@
   "url": "https://github.com/Paca-AI/paca",
   "categories": [
    "classification-routing"
+  ]
+ },
+ {
+  "repo": "Paras5Yadav/engram",
+  "name": "Engram",
+  "url": "https://github.com/Paras5Yadav/engram",
+  "categories": [
+   "agent-decisions"
   ]
  },
  {
@@ -945,6 +1129,30 @@
   ]
  },
  {
+  "repo": "rahulbansalc6414/jev-as-a-guardrail",
+  "name": "Jev vs Claude Haiku 4.5 as input guardrails",
+  "url": "https://github.com/rahulbansalc6414/jev-as-a-guardrail",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
+  "repo": "raxITlabs/decision-models-as-guardrails",
+  "name": "Decision Models as Guardrails",
+  "url": "https://github.com/raxITlabs/decision-models-as-guardrails",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
+  "repo": "ReadycodeAI/readycode-reader",
+  "name": "ReadyCode Reader",
+  "url": "https://github.com/ReadycodeAI/readycode-reader",
+  "categories": [
+   "verification-guardrails"
+  ]
+ },
+ {
   "repo": "ReallyArtificial/jev-by-example",
   "name": "Jev by Example",
   "url": "https://github.com/ReallyArtificial/jev-by-example",
@@ -958,14 +1166,6 @@
   "url": "https://github.com/replynodes/jev-web-analyzer",
   "categories": [
    "evaluation-benchmarking"
-  ]
- },
- {
-  "repo": "ringzerosec/jev-runtime-security",
-  "name": "jev-runtime-security",
-  "url": "https://github.com/ringzerosec/jev-runtime-security",
-  "categories": [
-   "verification-guardrails"
   ]
  },
  {
@@ -1009,6 +1209,14 @@
   ]
  },
  {
+  "repo": "saembit/jeff-act",
+  "name": "jeff-act",
+  "url": "https://github.com/saembit/jeff-act",
+  "categories": [
+   "agent-decisions"
+  ]
+ },
+ {
   "repo": "safzanpirani/pi-jev-skill-picker",
   "name": "pi-jev-skill-picker",
   "url": "https://github.com/safzanpirani/pi-jev-skill-picker",
@@ -1022,6 +1230,22 @@
   "url": "https://github.com/seccoit/sap-s4-antifraude-jev",
   "categories": [
    "classification-routing"
+  ]
+ },
+ {
+  "repo": "septagos/subcento",
+  "name": "Subcento",
+  "url": "https://github.com/septagos/subcento",
+  "categories": [
+   "verification-guardrails"
+  ]
+ },
+ {
+  "repo": "sgstq0811/VerdictAD-Jev-AD",
+  "name": "VerdictAD",
+  "url": "https://github.com/sgstq0811/VerdictAD-Jev-AD",
+  "categories": [
+   "verification-guardrails"
   ]
  },
  {
@@ -1046,6 +1270,14 @@
   "url": "https://github.com/shinpr/jev-reranker",
   "categories": [
    "scoring-ranking"
+  ]
+ },
+ {
+  "repo": "shiquda/SpotAsk",
+  "name": "SpotAsk",
+  "url": "https://github.com/shiquda/SpotAsk",
+  "categories": [
+   "classification-routing"
   ]
  },
  {
@@ -1097,6 +1329,14 @@
   ]
  },
  {
+  "repo": "soderlind/jev-mail-triage",
+  "name": "jev-mail-triage",
+  "url": "https://github.com/soderlind/jev-mail-triage",
+  "categories": [
+   "verification-guardrails"
+  ]
+ },
+ {
   "repo": "souvikr/jev-test",
   "name": "jev-test",
   "url": "https://github.com/souvikr/jev-test",
@@ -1113,9 +1353,9 @@
   ]
  },
  {
-  "repo": "sunyasheng/JevDeepResearch",
-  "name": "Jev Deep Research",
-  "url": "https://github.com/sunyasheng/JevDeepResearch",
+  "repo": "sunyasheng/JevGPT",
+  "name": "JevGPT",
+  "url": "https://github.com/sunyasheng/JevGPT",
   "categories": [
    "scoring-ranking"
   ]
@@ -1169,6 +1409,14 @@
   ]
  },
  {
+  "repo": "tejred213/ci-triage",
+  "name": "Jev CI triage",
+  "url": "https://github.com/tejred213/ci-triage",
+  "categories": [
+   "verification-guardrails"
+  ]
+ },
+ {
   "repo": "Thneoly/r2r-jev",
   "name": "r2r-jev",
   "url": "https://github.com/Thneoly/r2r-jev",
@@ -1201,17 +1449,9 @@
   ]
  },
  {
-  "repo": "uehaj/jev-semgrep",
-  "name": "jev-semgrep",
-  "url": "https://github.com/uehaj/jev-semgrep",
-  "categories": [
-   "scoring-ranking"
-  ]
- },
- {
-  "repo": "usenotra/notra",
-  "name": "Notra",
-  "url": "https://github.com/usenotra/notra",
+  "repo": "trungnt13/claude-system1",
+  "name": "System1 Thinking",
+  "url": "https://github.com/trungnt13/claude-system1",
   "categories": [
    "classification-routing"
   ]
@@ -1281,6 +1521,14 @@
   ]
  },
  {
+  "repo": "vortezwohl/JevNER",
+  "name": "JevNER",
+  "url": "https://github.com/vortezwohl/JevNER",
+  "categories": [
+   "data-labeling-curation"
+  ]
+ },
+ {
   "repo": "vynnlee/jev-mail",
   "name": "Jev-Mail",
   "url": "https://github.com/vynnlee/jev-mail",
@@ -1297,6 +1545,22 @@
   ]
  },
  {
+  "repo": "webmaster-ramos/jev-multilingual-benchmark",
+  "name": "jev-multilingual-benchmark",
+  "url": "https://github.com/webmaster-ramos/jev-multilingual-benchmark",
+  "categories": [
+   "content-moderation"
+  ]
+ },
+ {
+  "repo": "WeBuildDatabases/jev-job-by-job",
+  "name": "Jev, job by job",
+  "url": "https://github.com/WeBuildDatabases/jev-job-by-job",
+  "categories": [
+   "evaluation-benchmarking"
+  ]
+ },
+ {
   "repo": "WXK-AI/jev-opus",
   "name": "jev-opus",
   "url": "https://github.com/WXK-AI/jev-opus",
@@ -1310,14 +1574,6 @@
   "url": "https://github.com/xinyao27/jevonian",
   "categories": [
    "classification-routing"
-  ]
- },
- {
-  "repo": "xyzzzh/GroundingJev",
-  "name": "GroundingJev",
-  "url": "https://github.com/xyzzzh/GroundingJev",
-  "categories": [
-   "data-labeling-curation"
   ]
  },
  {
@@ -1385,9 +1641,17 @@
   ]
  },
  {
+  "repo": "ZeroTang05/VideoAdGuard",
+  "name": "VideoAdGuard",
+  "url": "https://github.com/ZeroTang05/VideoAdGuard",
+  "categories": [
+   "classification-routing"
+  ]
+ },
+ {
   "repo": "zilliztech/memsearch",
   "name": "MemSearch Jev reranking",
-  "url": "https://github.com/zilliztech/memsearch/blob/main/evaluation/reranking-evaluation.md",
+  "url": "https://github.com/zilliztech/memsearch",
   "categories": [
    "scoring-ranking"
   ]
